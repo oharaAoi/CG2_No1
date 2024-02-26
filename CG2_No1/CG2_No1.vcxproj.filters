@@ -13,10 +13,51 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="WinApp">
+      <UniqueIdentifier>{dd554670-9b94-46cd-925e-5c1679c30e3e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DirectXCommon">
+      <UniqueIdentifier>{a333bac3-3c5c-409c-80d9-fabadca917a7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Function">
+      <UniqueIdentifier>{7e663a21-4ec4-40fc-b621-20e35f36b703}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="MySystem.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="WinApp\WinApp.cpp">
+      <Filter>WinApp</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXCommon.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Function\Convert.cpp">
+      <Filter>Function</Filter>
+    </ClCompile>
+    <ClCompile Include="Function\DirectXUtils.cpp">
+      <Filter>Function</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="MySystem.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="WinApp\WinApp.h">
+      <Filter>WinApp</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXCommon.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Function\Convert.h">
+      <Filter>Function</Filter>
+    </ClInclude>
+    <ClInclude Include="Function\DirectXUtils.h">
+      <Filter>Function</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
