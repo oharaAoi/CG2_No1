@@ -29,10 +29,10 @@
     <ClInclude Include="Lib\Matrix4x4.h" />
     <ClInclude Include="Lib\MyMatrix.h" />
     <ClInclude Include="Lib\Transform.h" />
+    <ClInclude Include="Lib\Triangle.h" />
     <ClInclude Include="Lib\Vector3.h" />
     <ClInclude Include="Lib\Vector4.h" />
     <ClInclude Include="MySystem.h" />
-    <ClInclude Include="Triangle.h" />
     <ClInclude Include="WinApp\WinApp.h" />
   </ItemGroup>
   <ItemGroup>
