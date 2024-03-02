@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="DirectXCommon.cpp" />
+    <ClCompile Include="DirectXCommon\DirectXCommon.cpp" />
     <ClCompile Include="Function\Convert.cpp" />
     <ClCompile Include="Function\DirectXUtils.cpp" />
     <ClCompile Include="main.cpp" />
@@ -19,9 +19,9 @@
     <ClCompile Include="WinApp\WinApp.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Debugh.h" />
-    <ClInclude Include="DirectXCommon.h" />
+    <ClInclude Include="DirectXCommon\DirectXCommon.h" />
     <ClInclude Include="Function\Convert.h" />
+    <ClInclude Include="Function\Debugh.h" />
     <ClInclude Include="Function\DirectXUtils.h" />
     <ClInclude Include="MySystem.h" />
     <ClInclude Include="WinApp\WinApp.h" />
