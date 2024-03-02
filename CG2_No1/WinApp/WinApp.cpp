@@ -29,6 +29,10 @@ LRESULT CALLBACK WinApp::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM l
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 
+WinApp::~WinApp(){
+	Finalize();
+}
+
 /*==========================================================================
 	windowを生成する
 ==========================================================================*/

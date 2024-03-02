@@ -17,5 +17,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		system->EndFrame();
 	}
 
+	system->Finalize();
 	return 0;
 }

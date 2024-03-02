@@ -1,10 +1,15 @@
 #include "DirectXCommon.h"
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
+#pragma comment(lib, "dxguid.lib")
 
 DirectXCommon* DirectXCommon::GetInstacne() {
 	static DirectXCommon instance;
 	return &instance;
+}
+
+DirectXCommon::~DirectXCommon(){
+	Finalize();
 }
 
 //=================================================================================================================
@@ -23,12 +28,28 @@ void DirectXCommon::Initialize(WinApp* win, int32_t backBufferWidth, int32_t bac
 	CreateSwapChain();
 
 	CreateRTV();
+
+	CrateFence();
+}
+
+void DirectXCommon::Finalize(){
+	CloseHandle(fenceEvent_);
 }
 
 //=================================================================================================================
 //	↓DirectXを使うための初期化
 //=================================================================================================================
 void DirectXCommon::InitializeDXGDevice(){
+
+#ifdef _DEBUG
+	if (SUCCEEDED(D3D12GetDebugInterface(IID_PPV_ARGS(&debugController_)))) {
+		// デバックレイヤーを有効化する
+		debugController_->EnableDebugLayer();
+		// さらにGPU側でもチェック
+		debugController_->SetEnableGPUBasedValidation(TRUE);
+	}
+#endif
+
 	dxgiFactory_ = nullptr;
 	// HRESULはwidows系のエラーコードであり
 	// 関数が成功したかどうかをSUCCEEDEマクロ判定で判定できる
@@ -63,7 +84,6 @@ void DirectXCommon::InitializeDXGDevice(){
 	assert(useAdapter_ != nullptr);
 
 	// ------------------------------------------------------------------------------
-	device_ = nullptr;
 	// 機能レベルとログ出力四の文字列
 	D3D_FEATURE_LEVEL featureLevels[] = {
 		D3D_FEATURE_LEVEL_12_2, D3D_FEATURE_LEVEL_12_1, D3D_FEATURE_LEVEL_12_0
@@ -87,28 +107,102 @@ void DirectXCommon::InitializeDXGDevice(){
 	// デバイスの生成がうまく行かなかった時
 	assert(device_ != nullptr);
 	Log("complete create D3D12Device\n");
+
+#ifdef _DEBUG
+
+	Comptr<ID3D12InfoQueue> infoQueue = nullptr;
+	if (SUCCEEDED(device_->QueryInterface(IID_PPV_ARGS(&infoQueue)))) {
+		// ヤバいエラージに止まる
+		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, true);
+		// エラー時に止まる
+		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, true);
+		// 警告時に止まる
+		infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, true);
+
+		// 抑制するメッセージのID ------------------------------
+		D3D12_MESSAGE_ID denyIds[] = {
+			// Windows11でのDXGIデバックレイヤーとDX12デバックレイヤーの相互作用にバグによるメッセージ
+			// https://stackoverflow.com.questions/69805245/directx-12-application-is-crashing-in-windows-11
+			D3D12_MESSAGE_ID_RESOURCE_BARRIER_MISMATCHING_COMMAND_LIST_TYPE
+		};
+		// 抑制するレベル
+		D3D12_MESSAGE_SEVERITY severities[] = { D3D12_MESSAGE_SEVERITY_INFO };
+		D3D12_INFO_QUEUE_FILTER filter{};
+		filter.DenyList.NumIDs = _countof(denyIds);
+		filter.DenyList.pIDList = denyIds;
+		filter.DenyList.NumSeverities = _countof(severities);
+		filter.DenyList.pSeverityList = severities;
+		//指定してメッセージの表示を抑制する
+		infoQueue->PushStorageFilter(&filter);
+	}
+
+#endif // DEBUG
 }
 
 void DirectXCommon::BeginFrame(){
 	HRESULT hr = S_FALSE;
 	// インデックスを取得
 	UINT backBufferIndex = swapChain_->GetCurrentBackBufferIndex();
+
+	// ---------------------------------------------------------------
+	// ↓barrierを張る 
+	// ---------------------------------------------------------------
+	// Transitionzで張る
+	barrier_.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	barrier_.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	// barrierを張る対象のリソース
+	barrier_.Transition.pResource = swapChainResource_[backBufferIndex].Get();
+	// 遷移前のリソース
+	barrier_.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+	// 遷移後のResourceState
+	barrier_.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	// 張る
+	commandList_->ResourceBarrier(1, &barrier_);
+	// ---------------------------------------------------------------
+
 	// 描画先のRTVを設定
 	commandList_->OMSetRenderTargets(1, &rtvHandles_[backBufferIndex], false, nullptr);
 	// 色で画面全体をクリアする
 	float clearColor[] = { 0.1f, 0.25f, 0.5f, 1.0f };
 	commandList_->ClearRenderTargetView(rtvHandles_[backBufferIndex], clearColor, 0, nullptr);
-	// 確定させる
-	hr = commandList_->Close();
-	assert(SUCCEEDED(hr));
+
+	// ---------------------------------------------------------------
+	// ↓RTVの画面から画面表示できるようにする
+	// ---------------------------------------------------------------
+	barrier_.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	barrier_.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+
+	// 張る
+	commandList_->ResourceBarrier(1, &barrier_);
+	// ---------------------------------------------------------------
 }
 
 void DirectXCommon::EndFrame(){
 	HRESULT hr = S_FALSE;
+
+	// 確定させる
+	hr = commandList_->Close();
+	assert(SUCCEEDED(hr));
+
 	ID3D12CommandList* commadLists[] = { commandList_.Get()};
 	commandQueue_->ExecuteCommandLists(1, commadLists);
 	// GPUとOSに画面の交換をするようにする
 	swapChain_->Present(1, 0);
+
+	// fenceの値を更新
+	fenceValue_++;
+	// GPUがここまでたどり着いた時に,fenceの値を指定した値に第謬するようにsignelを送る
+	commandQueue_->Signal(fence_.Get(), fenceValue_);
+
+	// Fenceの値が指定したSignal値にたどりついているか確認する
+	// GetCompletedValueの初期値はFence作成時に渡した初期値
+	if (fence_->GetCompletedValue() < fenceValue_) {
+		// 指定下Signalにたどりついていないので、たどりつくまで松ようにイベントを設定する
+		fence_->SetEventOnCompletion(fenceValue_, fenceEvent_);
+
+		WaitForSingleObject(fenceEvent_, INFINITE);
+	}
+
 	// 次のコマンドリストの準備
 	hr = commandAllocator_->Reset();
 	assert(SUCCEEDED(hr));
@@ -156,22 +250,19 @@ void DirectXCommon::CreateSwapChain(){
 	desc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;	// モニタに移したら中身を破棄
 	
 	// コマンドキュー、ウィンドウハンドルを設定して生成する
-	Comptr<IDXGISwapChain1> swapChain1;
-	hr = dxgiFactory_->CreateSwapChainForHwnd(commandQueue_.Get(), winApp_->GetHwnd(), &desc, nullptr, nullptr, &swapChain1);
+	/*Comptr<IDXGISwapChain1> swapChain1;*/
+	hr = dxgiFactory_->CreateSwapChainForHwnd(commandQueue_.Get(), winApp_->GetHwnd(), &desc, nullptr, nullptr, reinterpret_cast<IDXGISwapChain1**>(swapChain_.GetAddressOf()));
 	assert(SUCCEEDED(hr));
 
-	// SwapChain4を得る
-	swapChain1->QueryInterface(IID_PPV_ARGS(&swapChain_));
-	assert(SUCCEEDED(hr));
+	//// SwapChain4を得る
+	//swapChain1->QueryInterface(IID_PPV_ARGS(&swapChain_));
+	//assert(SUCCEEDED(hr));
 
 	// resourceも一緒に作る
 	hr = swapChain_->GetBuffer(0, IID_PPV_ARGS(&swapChainResource_[0]));
 	assert(SUCCEEDED(hr));
-	hr = swapChain_->GetBuffer(0, IID_PPV_ARGS(&swapChainResource_[1]));
+	hr = swapChain_->GetBuffer(1, IID_PPV_ARGS(&swapChainResource_[1]));
 	assert(SUCCEEDED(hr));
-
-	// 使わなくなったら解放
-	swapChain1->Release();
 }
 
 /// <summary>
@@ -179,7 +270,7 @@ void DirectXCommon::CreateSwapChain(){
 /// </summary>
 void DirectXCommon::CreateRTV(){
 	// ヒープの生成
-	rtvDescriptorHeap = CreateDescriptorHeap(device_.Get(), D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 2, false);
+	rtvDescriptorHeap = CreateDescriptorHeap(device_, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 2, false);
 
 	// RTVの生成
 	rtvDesc_.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
@@ -192,4 +283,18 @@ void DirectXCommon::CreateRTV(){
 	// 二つ目の生成
 	rtvHandles_[1].ptr = rtvHandles_[0].ptr + device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 	device_->CreateRenderTargetView(swapChainResource_[1].Get(), &rtvDesc_, rtvHandles_[1]);
+}
+
+/// <summary>
+/// FenceとEventの生成
+/// </summary>
+void DirectXCommon::CrateFence(){
+	HRESULT hr = S_FALSE;
+	fenceValue_ = 0;
+	hr = device_->CreateFence(fenceValue_, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence_));
+	assert(SUCCEEDED(hr));
+
+	// Fenceのsignalを待つためのイベントを作成する
+	fenceEvent_ = CreateEvent(NULL, false, false, NULL);
+	assert(fenceEvent_ != nullptr);
 }

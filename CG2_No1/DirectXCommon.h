@@ -1,13 +1,15 @@
 #pragma once
 #include <d3d12.h>
 #include <dxgi1_6.h>
+#include "dxgidebug.h"
 #include <cassert>
 
-#include <wrl/client.h>
+#include <wrl.h>
 
 #include "WinApp.h"
 #include "Function/Convert.h"
 #include "Function/DirectXUtils.h"
+#include "Debugh.h"
 
 class DirectXCommon{
 public: // メンバ関数
@@ -18,11 +20,10 @@ public: // メンバ関数
 	/// <returns></returns>
 	static DirectXCommon* GetInstacne();
 
-
 public:
 
 	DirectXCommon() = default;
-	~DirectXCommon() = default;
+	~DirectXCommon();
 	DirectXCommon(const DirectXCommon&) = delete;
 	const DirectXCommon& operator=(const DirectXCommon&) = delete;
 
@@ -30,6 +31,8 @@ public:
 	/// 初期化
 	/// </summary>
 	void Initialize(WinApp* win, int32_t backBufferWidth, int32_t backBufferHeight);
+
+	void Finalize();
 
 public: // 色々な設定をしているメンバ関数
 
@@ -59,7 +62,14 @@ public: // 生成を行うメンバ関数
 	/// </summary>
 	void CreateRTV();
 
+	/// <summary>
+	/// Fenceの生成
+	/// </summary>
+	void CrateFence();
+
 private:
+
+	D3DResourceLeakChecker leakCheck;
 
 	WinApp* winApp_;
 	int32_t kClientWidth_;
@@ -71,6 +81,9 @@ private:
 	/// <typeparam name="T"></typeparam>
 	template<typename T>
 	using Comptr = Microsoft::WRL::ComPtr <T>;
+
+	// デバック
+	Comptr<ID3D12Debug1> debugController_ = nullptr;
 
 	// DirectXの初期化に使う物
 	Comptr<IDXGIFactory7> dxgiFactory_ = nullptr;
@@ -93,8 +106,16 @@ private:
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc_;
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles_[2];
 
-public:
+	// barrier
+	D3D12_RESOURCE_BARRIER barrier_;
 
+	// Fence & Event
+	Comptr<ID3D12Fence> fence_ = nullptr;
+	uint64_t  fenceValue_;
+	HANDLE fenceEvent_;
+
+
+public:
 	/// <summary>
 	///  Comptrのスマートポインタで定義した物のポインタを取得するための変換関数
 	/// </summary>
@@ -105,5 +126,4 @@ public:
 	T* ConvertComPtr(const Comptr<T>& comptr) {
 		return comptr.Get();
 	}
-
 };

@@ -1,5 +1,9 @@
 #include "MySystem.h"
 
+MySystem::~MySystem(){
+
+}
+
 bool MySystem::ProcessMessage(){
     return  winApp_->ProcessMessage();
 }
@@ -12,6 +16,9 @@ void MySystem::Initialize(uint32_t backBufferWidth, int32_t backBufferHeight){
     // ↓各初期化
     winApp_->CreateGameWindow();
     dxCommon_->Initialize(winApp_, backBufferWidth, backBufferHeight);
+}
+
+void MySystem::Finalize(){
 }
 
 void MySystem::BeginFrame(){

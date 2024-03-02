@@ -19,6 +19,7 @@
     <ClCompile Include="WinApp\WinApp.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Debugh.h" />
     <ClInclude Include="DirectXCommon.h" />
     <ClInclude Include="Function\Convert.h" />
     <ClInclude Include="Function\DirectXUtils.h" />

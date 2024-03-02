@@ -11,6 +11,8 @@
 
 #include "Function/Convert.h"
 
+#include <wrl.h>
+
 /// <summary>
 /// CompileShader
 /// </summary>
@@ -31,7 +33,11 @@ IDxcBlob* CompilerShader(
 /// <param name="numDescriptor"></param>
 /// <param name="shaderVisible"></param>
 /// <returns></returns>
-ID3D12DescriptorHeap* CreateDescriptorHeap(ID3D12Device* device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptor, bool shaderVisible);
+/// template<typename T>
+Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> CreateDescriptorHeap(Microsoft::WRL::ComPtr<ID3D12Device> device,
+	const D3D12_DESCRIPTOR_HEAP_TYPE& heapType,
+	const UINT& numDescriptor,
+	const bool& shaderVisible);
 
 /// <summary>
 /// 
@@ -39,7 +45,7 @@ ID3D12DescriptorHeap* CreateDescriptorHeap(ID3D12Device* device, D3D12_DESCRIPTO
 /// <param name="device"></param>
 /// <param name="sizeInBytes"></param>
 /// <returns></returns>
-ID3D12Resource* CreateBufferResource(ID3D12Device* device, size_t sizeInBytes);
+Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device> device, const size_t& sizeInBytes);
 
 /// <summary>
 /// 深度情報を格納するリソースの生成
@@ -48,7 +54,7 @@ ID3D12Resource* CreateBufferResource(ID3D12Device* device, size_t sizeInBytes);
 /// <param name="width"></param>
 /// <param name="height"></param>
 /// <returns></returns>
-ID3D12Resource* CreateDepthStencilTextureResource(ID3D12Device* device, int32_t width, int32_t height);
+Microsoft::WRL::ComPtr<ID3D12Resource> CreateDepthStencilTextureResource(Microsoft::WRL::ComPtr<ID3D12Device> device, const int32_t& width, const int32_t& height);
 
 /// <summary>
 /// ログを出す
