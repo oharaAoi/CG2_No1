@@ -14,18 +14,6 @@
 #include <wrl.h>
 
 /// <summary>
-/// CompileShader
-/// </summary>
-/// <param name=""></param>
-IDxcBlob* CompilerShader(
-	const std::wstring& filePath,
-	const wchar_t* profile,
-	IDxcUtils* dxcUtils,
-	IDxcCompiler3* dxcCompiler,
-	IDxcIncludeHandler* includeHandler
-);
-
-/// <summary>
 /// DiscriptorHeapの作成
 /// </summary>
 /// <param name="device"></param>
@@ -55,6 +43,18 @@ Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(Microsoft::WRL::ComP
 /// <param name="height"></param>
 /// <returns></returns>
 Microsoft::WRL::ComPtr<ID3D12Resource> CreateDepthStencilTextureResource(Microsoft::WRL::ComPtr<ID3D12Device> device, const int32_t& width, const int32_t& height);
+
+/// <summary>
+/// CompileShader
+/// </summary>
+/// <param name=""></param>
+Microsoft::WRL::ComPtr<IDxcBlob> CompilerShader(
+	const std::wstring& filePath,
+	const wchar_t* profile,
+	Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils,
+	Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler,
+	Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler
+);
 
 /// <summary>
 /// ログを出す

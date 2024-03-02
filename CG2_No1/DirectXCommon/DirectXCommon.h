@@ -7,9 +7,12 @@
 #include <wrl.h>
 
 #include "WinApp.h"
+
 #include "Function/Convert.h"
 #include "Function/DirectXUtils.h"
-#include "Debugh.h"
+#include "Function/Debug.h"
+
+#include "Vector4.h"
 
 class DirectXCommon{
 public: // メンバ関数
@@ -34,6 +37,16 @@ public:
 
 	void Finalize();
 
+public: // accsesser
+
+	Microsoft::WRL::ComPtr<ID3D12Device> GetDevice() { return device_; }
+
+	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> GetCommandList() { return commandList_; }
+
+	Microsoft::WRL::ComPtr<ID3D12RootSignature> GetRootSignature() { return rootSignature_; }
+
+	Microsoft::WRL::ComPtr<ID3D12PipelineState> GetPSO() { return graphicsPipelineState_; }
+
 public: // 色々な設定をしているメンバ関数
 
 	/// <summary>
@@ -41,8 +54,19 @@ public: // 色々な設定をしているメンバ関数
 	/// </summary>
 	void InitializeDXGDevice();
 
+	/// <summary>
+	/// DierctXCompilerの初期化
+	/// </summary>
+	void InitializeDXC();
+
+	/// <summary>
+	/// フレームの開始
+	/// </summary>
 	void BeginFrame();
 
+	/// <summary>
+	/// フレームの終了
+	/// </summary>
 	void EndFrame();
 
 public: // 生成を行うメンバ関数
@@ -66,6 +90,42 @@ public: // 生成を行うメンバ関数
 	/// Fenceの生成
 	/// </summary>
 	void CrateFence();
+	
+
+//=================================================================================================================
+//	↓PSOの内容
+//=================================================================================================================
+	/// <summary>
+	/// RootSignatureの生成
+	/// </summary>
+	void CreateRootSignature();
+
+	/// <summary>
+	/// InputLayoutの生成
+	/// </summary>
+	void CreateInputLayout();
+
+	/// <summary>
+	/// Shaderをcompileする
+	/// </summary>
+	void ShaderCompile();
+
+	/// <summary>
+	/// BlendStateの設定
+	/// </summary>
+	D3D12_BLEND_DESC SetBlendState();
+
+	/// <summary>
+	/// RasterizerStateの設定
+	/// </summary>
+	D3D12_RASTERIZER_DESC SetRasterizerState();
+
+	/// <summary>
+	/// PSOの生成
+	/// </summary>
+	void CreatePSO();
+
+//=================================================================================================================
 
 private:
 
@@ -114,6 +174,30 @@ private:
 	uint64_t  fenceValue_;
 	HANDLE fenceEvent_;
 
+	// DXCで使う
+	Comptr<IDxcUtils> dxcUtils_ = nullptr;
+	Comptr<IDxcCompiler3> dxcCompiler_ = nullptr;
+	Comptr<IDxcIncludeHandler> includeHandler_ = nullptr;
+
+//=================================================================================================================
+//	↓PSOの内容
+//=================================================================================================================
+	// rootSignature
+	Comptr<ID3DBlob> signatureBlob_ = nullptr;
+	Comptr<ID3DBlob> errorBlob_ = nullptr;
+	Comptr<ID3D12RootSignature> rootSignature_ = nullptr;
+
+	// inputLayout
+	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc_;
+
+	// Shader
+	Comptr<IDxcBlob> vertexShaderBlob_ = nullptr;
+	Comptr<IDxcBlob> pixelShaderBlob_ = nullptr;
+
+	// PSO
+	Comptr<ID3D12PipelineState> graphicsPipelineState_ = nullptr;
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc_;
+//=================================================================================================================
 
 public:
 	/// <summary>

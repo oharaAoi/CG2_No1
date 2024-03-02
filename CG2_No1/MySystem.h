@@ -2,6 +2,12 @@
 #include "WinApp.h"
 #include "DirectXCommon.h"
 
+// 
+#include "Triangle.h"
+
+// 
+#include "MyMatrix.h"
+
 class MySystem{
 public: // メンバ関数
 
@@ -21,10 +27,20 @@ public: // メンバ関数
 	void BeginFrame();
 	void EndFrame();
 
+public: // メンバ関数
+
+	void DrawTriangle(const Matrix4x4 worldMatrix);
+
 private:
+
+	int32_t kClientWidth_;
+	int32_t kClientHeight_;
 
 	DirectXCommon* dxCommon_ = nullptr;
 	WinApp* winApp_ = nullptr;
+
+	// 
+	kTriangle triangle_;
 
 };
 

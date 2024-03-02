@@ -21,15 +21,26 @@ void DirectXCommon::Initialize(WinApp* win, int32_t backBufferWidth, int32_t bac
 	kClientWidth_ = backBufferWidth;
 	kClientHeight_ = backBufferHeight;
 
+	// deviceの初期化
 	InitializeDXGDevice();
 
+	// commandの初期化
 	CreateCommand();
 
+	// swapChainの初期化
 	CreateSwapChain();
 
+	// RTVの初期化
 	CreateRTV();
 
+	// FenceとEventの初期化
 	CrateFence();
+
+	// compilerの初期化
+	InitializeDXC();
+
+	// PSOの生成
+	CreatePSO();
 }
 
 void DirectXCommon::Finalize(){
@@ -139,6 +150,23 @@ void DirectXCommon::InitializeDXGDevice(){
 #endif // DEBUG
 }
 
+//=================================================================================================================
+//	↓HLSLからDXILに変換するCompilerの初期化
+//=================================================================================================================
+void DirectXCommon::InitializeDXC(){
+	HRESULT hr = S_FALSE;
+	hr = DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&dxcUtils_));
+	assert(SUCCEEDED(hr));
+	hr = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&dxcCompiler_));
+
+	// includeに対応するための設定
+	hr = dxcUtils_->CreateDefaultIncludeHandler(&includeHandler_);
+	assert(SUCCEEDED(hr));
+}
+
+//=================================================================================================================
+//	↓フレーム系
+//=================================================================================================================
 void DirectXCommon::BeginFrame(){
 	HRESULT hr = S_FALSE;
 	// インデックスを取得
@@ -166,6 +194,11 @@ void DirectXCommon::BeginFrame(){
 	float clearColor[] = { 0.1f, 0.25f, 0.5f, 1.0f };
 	commandList_->ClearRenderTargetView(rtvHandles_[backBufferIndex], clearColor, 0, nullptr);
 
+}
+
+void DirectXCommon::EndFrame(){
+	HRESULT hr = S_FALSE;
+
 	// ---------------------------------------------------------------
 	// ↓RTVの画面から画面表示できるようにする
 	// ---------------------------------------------------------------
@@ -175,10 +208,6 @@ void DirectXCommon::BeginFrame(){
 	// 張る
 	commandList_->ResourceBarrier(1, &barrier_);
 	// ---------------------------------------------------------------
-}
-
-void DirectXCommon::EndFrame(){
-	HRESULT hr = S_FALSE;
 
 	// 確定させる
 	hr = commandList_->Close();
@@ -298,3 +327,131 @@ void DirectXCommon::CrateFence(){
 	fenceEvent_ = CreateEvent(NULL, false, false, NULL);
 	assert(fenceEvent_ != nullptr);
 }
+
+//=================================================================================================================
+//	↓PSOの内容
+//=================================================================================================================
+/// <summary>
+/// RootSignature
+/// </summary>
+void DirectXCommon::CreateRootSignature(){
+	HRESULT hr = S_FALSE;
+	D3D12_ROOT_SIGNATURE_DESC desc{};
+	desc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+	// rootParameterの作成
+	D3D12_ROOT_PARAMETER rootParameters[2] = {};
+	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;	// CBVを使う
+	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;	// PixelShaderで使う
+	rootParameters[0].Descriptor.ShaderRegister = 0;					// レジスタ番号とバインド
+
+	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV; 
+	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+	rootParameters[1].Descriptor.ShaderRegister = 0;
+
+	desc.pParameters = rootParameters;
+	desc.NumParameters = _countof(rootParameters);
+
+	// シリアライズしてバイナリにする
+	hr = D3D12SerializeRootSignature(&desc,
+		D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob_, &errorBlob_);
+	if (FAILED(hr)) {
+		Log(reinterpret_cast<char*>(errorBlob_->GetBufferPointer()));
+		assert(false);
+	}
+
+	// バイナリを元に生成
+	hr = device_->CreateRootSignature(0, signatureBlob_->GetBufferPointer(), signatureBlob_->GetBufferSize(), IID_PPV_ARGS(&rootSignature_));
+	assert(SUCCEEDED(hr));
+}
+
+/// <summary>
+/// inputLayout
+/// </summary>
+void DirectXCommon::CreateInputLayout(){
+	D3D12_INPUT_ELEMENT_DESC desc[1] = {};
+	desc[0].SemanticName = "POSITION";
+	desc[0].SemanticIndex = 0;
+	desc[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	desc[0].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+
+	inputLayoutDesc_.pInputElementDescs = desc;
+	inputLayoutDesc_.NumElements = _countof(desc);
+}
+
+/// <summary>
+/// ShaderCompile
+/// </summary>
+void DirectXCommon::ShaderCompile(){
+	vertexShaderBlob_ = CompilerShader(L"Object3D.VS.hlsl", L"vs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
+	assert(vertexShaderBlob_ != nullptr);
+
+	pixelShaderBlob_ = CompilerShader(L"Object3D.PS.hlsl", L"ps_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
+	assert(pixelShaderBlob_ != nullptr);
+}
+
+/// <summary>
+/// BlendStateの設定
+/// </summary>
+D3D12_BLEND_DESC DirectXCommon::SetBlendState(){
+	D3D12_BLEND_DESC blendDesc{};
+	// すべての色要素を書き込む
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+
+	return blendDesc;
+}
+
+/// <summary>
+/// RasterizerStateの設定
+/// </summary>
+D3D12_RASTERIZER_DESC DirectXCommon::SetRasterizerState(){
+	D3D12_RASTERIZER_DESC rasterizerDesc{};
+	// 裏面を表示しない
+	rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+	// 三角形の中を塗りつぶす
+	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
+
+	return rasterizerDesc;
+}
+
+/// <summary>
+/// PSOの生成
+/// </summary>
+void DirectXCommon::CreatePSO(){
+	HRESULT hr = S_FALSE;
+
+	CreateRootSignature();
+	/*CreateInputLayout();*/
+	ShaderCompile();
+
+	// --------------------------------------------------------------------
+	D3D12_INPUT_ELEMENT_DESC desc[1] = {};
+	desc[0].SemanticName = "POSITION";
+	desc[0].SemanticIndex = 0;
+	desc[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	desc[0].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+
+	inputLayoutDesc_.pInputElementDescs = desc;
+	inputLayoutDesc_.NumElements = _countof(desc);
+	// --------------------------------------------------------------------
+
+	graphicsPipelineStateDesc_.pRootSignature = rootSignature_.Get();
+	graphicsPipelineStateDesc_.InputLayout = inputLayoutDesc_;
+	graphicsPipelineStateDesc_.VS = { vertexShaderBlob_->GetBufferPointer(), vertexShaderBlob_->GetBufferSize() };
+	graphicsPipelineStateDesc_.PS = { pixelShaderBlob_->GetBufferPointer(), pixelShaderBlob_->GetBufferSize() };
+	graphicsPipelineStateDesc_.BlendState = SetBlendState();
+	graphicsPipelineStateDesc_.RasterizerState = SetRasterizerState();
+
+	// 書き込むRTVの情報
+	graphicsPipelineStateDesc_.NumRenderTargets = 1;
+	graphicsPipelineStateDesc_.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+	// 利用するトポロジ(形状)のタイプ。三角形
+	graphicsPipelineStateDesc_.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	// どのように画面に色を打ち込むかの設定
+	graphicsPipelineStateDesc_.SampleDesc.Count = 1;
+	graphicsPipelineStateDesc_.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
+	// 実際に生成
+	hr = device_->CreateGraphicsPipelineState(&graphicsPipelineStateDesc_, IID_PPV_ARGS(&graphicsPipelineState_));
+	assert(SUCCEEDED(hr));
+}
+//=================================================================================================================
