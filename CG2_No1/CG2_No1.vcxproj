@@ -13,6 +13,13 @@
   <ItemGroup>
     <ClCompile Include="Camera\Camera.cpp" />
     <ClCompile Include="DirectXCommon\DirectXCommon.cpp" />
+    <ClCompile Include="Externals\ImGui\imgui.cpp" />
+    <ClCompile Include="Externals\ImGui\imgui_demo.cpp" />
+    <ClCompile Include="Externals\ImGui\imgui_draw.cpp" />
+    <ClCompile Include="Externals\ImGui\imgui_impl_dx12.cpp" />
+    <ClCompile Include="Externals\ImGui\imgui_impl_win32.cpp" />
+    <ClCompile Include="Externals\ImGui\imgui_tables.cpp" />
+    <ClCompile Include="Externals\ImGui\imgui_widgets.cpp" />
     <ClCompile Include="Function\Convert.cpp" />
     <ClCompile Include="Function\DirectXUtils.cpp" />
     <ClCompile Include="Lib\MyMatrix.cpp" />
@@ -23,6 +30,14 @@
   <ItemGroup>
     <ClInclude Include="Camera\Camera.h" />
     <ClInclude Include="DirectXCommon\DirectXCommon.h" />
+    <ClInclude Include="Externals\ImGui\imconfig.h" />
+    <ClInclude Include="Externals\ImGui\imgui.h" />
+    <ClInclude Include="Externals\ImGui\imgui_impl_dx12.h" />
+    <ClInclude Include="Externals\ImGui\imgui_impl_win32.h" />
+    <ClInclude Include="Externals\ImGui\imgui_internal.h" />
+    <ClInclude Include="Externals\ImGui\imstb_rectpack.h" />
+    <ClInclude Include="Externals\ImGui\imstb_textedit.h" />
+    <ClInclude Include="Externals\ImGui\imstb_truetype.h" />
     <ClInclude Include="Function\Convert.h" />
     <ClInclude Include="Function\Debug.h" />
     <ClInclude Include="Function\DirectXUtils.h" />
@@ -48,6 +63,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Externals\ImGui\LICENSE.txt" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
