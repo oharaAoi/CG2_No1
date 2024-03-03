@@ -21,6 +21,8 @@ void DirectXCommon::Initialize(WinApp* win, int32_t backBufferWidth, int32_t bac
 	kClientWidth_ = backBufferWidth;
 	kClientHeight_ = backBufferHeight;
 
+	bufferCount_ = 2;
+
 	// deviceの初期化
 	InitializeDXGDevice();
 
@@ -32,6 +34,9 @@ void DirectXCommon::Initialize(WinApp* win, int32_t backBufferWidth, int32_t bac
 
 	// RTVの初期化
 	CreateRTV();
+
+	// srvHeapの作成
+	srvDiscriptorHeap_ = CreateDescriptorHeap(device_, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 128, true);
 
 	// FenceとEventの初期化
 	CrateFence();
@@ -194,6 +199,9 @@ void DirectXCommon::BeginFrame(){
 	float clearColor[] = { 0.1f, 0.25f, 0.5f, 1.0f };
 	commandList_->ClearRenderTargetView(rtvHandles_[backBufferIndex], clearColor, 0, nullptr);
 
+	// 描画用のDescriptorHeapの設定
+	ID3D12DescriptorHeap* descriptorHeaps[] = { srvDiscriptorHeap_.Get() };
+	commandList_->SetDescriptorHeaps(1, descriptorHeaps);
 }
 
 void DirectXCommon::EndFrame(){

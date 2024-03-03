@@ -15,23 +15,31 @@ void MySystem::Initialize(uint32_t backBufferWidth, int32_t backBufferHeight){
     // ↓インスタンスの生成
     winApp_ = WinApp::GetInstance();
     dxCommon_ = DirectXCommon::GetInstacne();
+	imGuiManager_ = ImGuiManager::GetInstacne();
 
     // ↓各初期化
     winApp_->CreateGameWindow();
     dxCommon_->Initialize(winApp_, backBufferWidth, backBufferHeight);
+	imGuiManager_->Init(winApp_, dxCommon_);
 
     // 三角形
 
 }
 
 void MySystem::Finalize(){
+	imGuiManager_->Finalize();
 }
 
 void MySystem::BeginFrame(){
+	imGuiManager_->Begin();
+
     dxCommon_->BeginFrame();
 }
 
 void MySystem::EndFrame(){
+	imGuiManager_->End();
+	imGuiManager_->Draw();
+
     dxCommon_->EndFrame();
 }
 

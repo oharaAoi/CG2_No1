@@ -39,6 +39,8 @@ public:
 
 public: // accsesser
 
+	UINT GetBufferCount() const { return bufferCount_; }
+
 	Microsoft::WRL::ComPtr<ID3D12Device> GetDevice() { return device_; }
 
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> GetCommandList() { return commandList_; }
@@ -46,6 +48,8 @@ public: // accsesser
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> GetRootSignature() { return rootSignature_; }
 
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> GetPSO() { return graphicsPipelineState_; }
+
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> GetSRVDiscriptorHeap() { return srvDiscriptorHeap_; }
 
 public: // 色々な設定をしているメンバ関数
 
@@ -135,6 +139,8 @@ private:
 	int32_t kClientWidth_;
 	int32_t kClientHeight_;
 
+	UINT bufferCount_; 
+
 	/// <summary>///
 	/// objectが不要になった時に自動でRelese
 	/// </summary>///
@@ -198,6 +204,9 @@ private:
 	Comptr<ID3D12PipelineState> graphicsPipelineState_ = nullptr;
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc_;
 //=================================================================================================================
+
+	// SRV用のDiscriptorHeap
+	Comptr<ID3D12DescriptorHeap> srvDiscriptorHeap_ = nullptr;
 
 public:
 	/// <summary>

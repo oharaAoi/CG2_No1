@@ -24,6 +24,7 @@
     <ClCompile Include="Function\DirectXUtils.cpp" />
     <ClCompile Include="Lib\MyMatrix.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Manager\ImGuiManager.cpp" />
     <ClCompile Include="MySystem.cpp" />
     <ClCompile Include="WinApp\WinApp.cpp" />
   </ItemGroup>
@@ -47,6 +48,7 @@
     <ClInclude Include="Lib\Triangle.h" />
     <ClInclude Include="Lib\Vector3.h" />
     <ClInclude Include="Lib\Vector4.h" />
+    <ClInclude Include="Manager\ImGuiManager.h" />
     <ClInclude Include="MySystem.h" />
     <ClInclude Include="WinApp\WinApp.h" />
   </ItemGroup>
@@ -111,7 +113,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir)\DirectXCommon\;$(ProjectDir)\WinApp\;$(ProjectDir)\Lib\;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\DirectXCommon\;$(ProjectDir)\Manager\;$(ProjectDir)\WinApp\;$(ProjectDir)\Lib\;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

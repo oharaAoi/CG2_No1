@@ -1,6 +1,7 @@
 #pragma once
 #include "WinApp.h"
 #include "DirectXCommon.h"
+#include "ImGuiManager.h"
 
 // 
 #include "Triangle.h"
@@ -38,6 +39,7 @@ private:
 
 	DirectXCommon* dxCommon_ = nullptr;
 	WinApp* winApp_ = nullptr;
+	ImGuiManager* imGuiManager_ = nullptr;
 
 	// 
 	kTriangle triangle_;

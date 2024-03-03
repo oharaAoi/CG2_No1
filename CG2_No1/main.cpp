@@ -26,10 +26,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	while (system->ProcessMessage()) {
 		system->BeginFrame();
 		
-		// move
+		ImGui::ShowDemoWindow();
+
+		// move ----------------------------------------------------------
 		transform.rotate.y += 0.01f;
 		worldMatrix = MakeAffineMatrix(transform);
 		wvpMatrix = Multiply(worldMatrix, camera->GetVpMatrix());
+		// ---------------------------------------------------------------
 
 		// 三角形の描画
 		system->DrawTriangle(wvpMatrix);
