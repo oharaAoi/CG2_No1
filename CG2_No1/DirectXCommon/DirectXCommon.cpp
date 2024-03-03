@@ -347,8 +347,15 @@ void DirectXCommon::CreateRootSignature(){
 	D3D12_ROOT_SIGNATURE_DESC desc{};
 	desc.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
+	// 複数のtextureを読むための
+	D3D12_DESCRIPTOR_RANGE descriptorRange[1]{};
+	descriptorRange[0].BaseShaderRegister = 0;
+	descriptorRange[0].NumDescriptors = 1;
+	descriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	descriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
 	// rootParameterの作成
-	D3D12_ROOT_PARAMETER rootParameters[2] = {};
+	D3D12_ROOT_PARAMETER rootParameters[3] = {};
 	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;	// CBVを使う
 	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;	// PixelShaderで使う
 	rootParameters[0].Descriptor.ShaderRegister = 0;					// レジスタ番号とバインド
@@ -357,8 +364,28 @@ void DirectXCommon::CreateRootSignature(){
 	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
 	rootParameters[1].Descriptor.ShaderRegister = 0;
 
+	// DescriptorTable
+	rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;		// DescriptorTableを使う
+	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;					// PixelShaderで使う
+	rootParameters[2].DescriptorTable.pDescriptorRanges = descriptorRange;				// Tableの中身の配列を指定
+	rootParameters[2].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange);	// Tableで利用する数
+
 	desc.pParameters = rootParameters;
 	desc.NumParameters = _countof(rootParameters);
+
+	// Samplerの設定 -------------------------------------------
+	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
+	staticSamplers[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+	staticSamplers[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	staticSamplers[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	staticSamplers[0].AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+	staticSamplers[0].ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
+	staticSamplers[0].MaxLOD = D3D12_FLOAT32_MAX;
+	staticSamplers[0].ShaderRegister = 0;
+	staticSamplers[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+	desc.pStaticSamplers = staticSamplers;
+	desc.NumStaticSamplers = _countof(staticSamplers);
 
 	// シリアライズしてバイナリにする
 	hr = D3D12SerializeRootSignature(&desc,
@@ -433,11 +460,16 @@ void DirectXCommon::CreatePSO(){
 	ShaderCompile();
 
 	// --------------------------------------------------------------------
-	D3D12_INPUT_ELEMENT_DESC desc[1] = {};
+	D3D12_INPUT_ELEMENT_DESC desc[2] = {};
 	desc[0].SemanticName = "POSITION";
 	desc[0].SemanticIndex = 0;
 	desc[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	desc[0].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+
+	desc[1].SemanticName = "TEXCOORD";
+	desc[1].SemanticIndex = 0;
+	desc[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+	desc[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
 
 	inputLayoutDesc_.pInputElementDescs = desc;
 	inputLayoutDesc_.NumElements = _countof(desc);

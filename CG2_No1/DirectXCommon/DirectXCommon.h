@@ -12,7 +12,7 @@
 #include "Function/DirectXUtils.h"
 #include "Function/Debug.h"
 
-#include "Vector4.h"
+#include "VertexData.h"
 
 class DirectXCommon{
 public: // メンバ関数

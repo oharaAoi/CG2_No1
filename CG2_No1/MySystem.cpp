@@ -12,21 +12,25 @@ void MySystem::Initialize(uint32_t backBufferWidth, int32_t backBufferHeight){
 	kClientWidth_ = backBufferWidth;
 	kClientHeight_ = backBufferHeight;
 
+	// COMの初期化
+	CoInitializeEx(0, COINIT_MULTITHREADED);
+
     // ↓インスタンスの生成
     winApp_ = WinApp::GetInstance();
     dxCommon_ = DirectXCommon::GetInstacne();
 	imGuiManager_ = ImGuiManager::GetInstacne();
+	textureManager_ = TextureManager::GetInstacne();
 
     // ↓各初期化
     winApp_->CreateGameWindow();
     dxCommon_->Initialize(winApp_, backBufferWidth, backBufferHeight);
 	imGuiManager_->Init(winApp_, dxCommon_);
-
-    // 三角形
+	textureManager_->Initialize(dxCommon_);
 
 }
 
 void MySystem::Finalize(){
+	CoUninitialize();
 	imGuiManager_->Finalize();
 }
 
@@ -48,24 +52,27 @@ void MySystem::DrawTriangle(const Matrix4x4 worldMatrix){
 	// ↓Vetrtexの設定
 	// ---------------------------------------------------------------
 	// VertexBufferViewを作成する 
-	triangle_.vertexResource_ = CreateBufferResource(dxCommon_->GetDevice(), sizeof(Vector4) * 3);
+	triangle_.vertexResource_ = CreateBufferResource(dxCommon_->GetDevice(), sizeof(VertexData) * 3);
 	// リソースの先頭のアドレスから使う
 	triangle_.vertexBufferView_.BufferLocation = triangle_.vertexResource_->GetGPUVirtualAddress();
 	// 使用するリソースのサイズは頂点3つ分のサイズ
-	triangle_.vertexBufferView_.SizeInBytes = sizeof(Vector4) * 3;
+	triangle_.vertexBufferView_.SizeInBytes = sizeof(VertexData) * 3;
 	// 1頂点当たりのサイズ
-	triangle_.vertexBufferView_.StrideInBytes = sizeof(Vector4);
+	triangle_.vertexBufferView_.StrideInBytes = sizeof(VertexData);
 
 	// Resourceにデータを書き込む 
-	Vector4* vertexData = nullptr;
+	VertexData* vertexData = nullptr;
 	// アドレスを取得
 	triangle_.vertexResource_->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
 	// 左下
-	vertexData[0] = { -0.5f, -0.5f, 0.0f, 1.0f };
+	vertexData[0].pos = { -0.5f, -0.5f, 0.0f, 1.0f };
+	vertexData[0].texcord = { 0.0f, 1.0f };
 	// 上
-	vertexData[1] = { 0.0f, 0.5f, 0.0f, 1.0f };
+	vertexData[1].pos = { 0.0f, 0.5f, 0.0f, 1.0f };
+	vertexData[1].texcord = { 0.5f, 0.0f };
 	// 右下
-	vertexData[2] = { 0.5f, -0.5f, 0.0f, 1.0f };
+	vertexData[2].pos = { 0.5f, -0.5f, 0.0f, 1.0f };
+	vertexData[2].texcord = { 1.0f, 1.0f };
 	// ---------------------------------------------------------------
 
 	// ---------------------------------------------------------------
@@ -122,6 +129,8 @@ void MySystem::DrawTriangle(const Matrix4x4 worldMatrix){
 	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, triangle_.materialResource_->GetGPUVirtualAddress());
 	// wvpCBufferの設定
 	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(1, triangle_.wvpResource_->GetGPUVirtualAddress());
+	// どのtextureを読むのかをコマンドに積む
+	dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureManager_->GetSRVHandleGPU());
 
 	dxCommon_->GetCommandList()->DrawInstanced(3, 1, 0, 0);
 }
