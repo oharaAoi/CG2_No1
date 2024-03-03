@@ -22,6 +22,12 @@
     <Filter Include="Function">
       <UniqueIdentifier>{7e663a21-4ec4-40fc-b621-20e35f36b703}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Lib">
+      <UniqueIdentifier>{6bec823c-baee-4ffd-96ed-c400ef45ef3f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Camera">
+      <UniqueIdentifier>{c161f4a1-75c3-4662-93d6-e766b9339392}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -33,14 +39,20 @@
     <ClCompile Include="WinApp\WinApp.cpp">
       <Filter>WinApp</Filter>
     </ClCompile>
-    <ClCompile Include="DirectXCommon.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="Function\Convert.cpp">
       <Filter>Function</Filter>
     </ClCompile>
     <ClCompile Include="Function\DirectXUtils.cpp">
       <Filter>Function</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectXCommon\DirectXCommon.cpp">
+      <Filter>DirectXCommon</Filter>
+    </ClCompile>
+    <ClCompile Include="Lib\MyMatrix.cpp">
+      <Filter>Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera\Camera.cpp">
+      <Filter>Camera</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -50,17 +62,42 @@
     <ClInclude Include="WinApp\WinApp.h">
       <Filter>WinApp</Filter>
     </ClInclude>
-    <ClInclude Include="DirectXCommon.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Function\Convert.h">
       <Filter>Function</Filter>
     </ClInclude>
     <ClInclude Include="Function\DirectXUtils.h">
       <Filter>Function</Filter>
     </ClInclude>
-    <ClInclude Include="Debugh.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="DirectXCommon\DirectXCommon.h">
+      <Filter>DirectXCommon</Filter>
     </ClInclude>
+    <ClInclude Include="Lib\Matrix4x4.h">
+      <Filter>Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="Lib\MyMatrix.h">
+      <Filter>Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="Lib\Transform.h">
+      <Filter>Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="Lib\Triangle.h">
+      <Filter>Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="Lib\Vector3.h">
+      <Filter>Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="Lib\Vector4.h">
+      <Filter>Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera\Camera.h">
+      <Filter>Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Function\Debug.h">
+      <Filter>Function</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Object3d.PS.hlsl" />
+    <FxCompile Include="Object3d.VS.hlsl" />
   </ItemGroup>
 </Project>
