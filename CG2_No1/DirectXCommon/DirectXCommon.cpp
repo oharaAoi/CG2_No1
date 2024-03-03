@@ -418,10 +418,10 @@ void DirectXCommon::CreateInputLayout(){
 /// ShaderCompile
 /// </summary>
 void DirectXCommon::ShaderCompile(){
-	vertexShaderBlob_ = CompilerShader(L"Object3D.VS.hlsl", L"vs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
+	vertexShaderBlob_ = CompilerShader(L"HLSL/Object3d.VS.hlsl", L"vs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
 	assert(vertexShaderBlob_ != nullptr);
 
-	pixelShaderBlob_ = CompilerShader(L"Object3D.PS.hlsl", L"ps_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
+	pixelShaderBlob_ = CompilerShader(L"HLSL/Object3d.PS.hlsl", L"ps_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
 	assert(pixelShaderBlob_ != nullptr);
 }
 
