@@ -95,6 +95,10 @@ public: // 生成を行うメンバ関数
 	/// </summary>
 	void CrateFence();
 	
+	/// <summary>
+	/// DSVの設定をする
+	/// </summary>
+	void CreateDSV();
 
 //=================================================================================================================
 //	↓PSOの内容
@@ -123,6 +127,12 @@ public: // 生成を行うメンバ関数
 	/// RasterizerStateの設定
 	/// </summary>
 	D3D12_RASTERIZER_DESC SetRasterizerState();
+
+	/// <summary>
+	/// DepthStencilStateの設定
+	/// </summary>
+	/// <returns></returns>
+	D3D12_DEPTH_STENCIL_DESC SetDepthStencilState();
 
 	/// <summary>
 	/// PSOの生成
@@ -184,6 +194,10 @@ private:
 	Comptr<IDxcUtils> dxcUtils_ = nullptr;
 	Comptr<IDxcCompiler3> dxcCompiler_ = nullptr;
 	Comptr<IDxcIncludeHandler> includeHandler_ = nullptr;
+
+	// DepthStencilView(DSV)
+	Comptr<ID3D12Resource> depthStencilResource_ = nullptr;
+	Comptr<ID3D12DescriptorHeap> dsvDescriptorHeap_ = nullptr;
 
 //=================================================================================================================
 //	↓PSOの内容

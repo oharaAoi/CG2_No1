@@ -44,6 +44,8 @@ void DirectXCommon::Initialize(WinApp* win, int32_t backBufferWidth, int32_t bac
 	// compilerの初期化
 	InitializeDXC();
 
+	CreateDSV();
+
 	// PSOの生成
 	CreatePSO();
 }
@@ -193,11 +195,16 @@ void DirectXCommon::BeginFrame(){
 	commandList_->ResourceBarrier(1, &barrier_);
 	// ---------------------------------------------------------------
 
+	// 描画先のRTVとDSVを設定する
+	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart();
 	// 描画先のRTVを設定
-	commandList_->OMSetRenderTargets(1, &rtvHandles_[backBufferIndex], false, nullptr);
+	commandList_->OMSetRenderTargets(1, &rtvHandles_[backBufferIndex], false, &dsvHandle);
 	// 色で画面全体をクリアする
 	float clearColor[] = { 0.1f, 0.25f, 0.5f, 1.0f };
 	commandList_->ClearRenderTargetView(rtvHandles_[backBufferIndex], clearColor, 0, nullptr);
+
+	//指定した深度で画面全体をクリアする
+	commandList_->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
 	// 描画用のDescriptorHeapの設定
 	ID3D12DescriptorHeap* descriptorHeaps[] = { srvDiscriptorHeap_.Get() };
@@ -336,6 +343,23 @@ void DirectXCommon::CrateFence(){
 	assert(fenceEvent_ != nullptr);
 }
 
+/// <summary>
+/// 
+/// </summary>
+void DirectXCommon::CreateDSV(){
+	depthStencilResource_ = CreateDepthStencilTextureResource(device_, kClientWidth_, kClientHeight_);
+
+	// heapを作る
+	dsvDescriptorHeap_ = CreateDescriptorHeap(device_, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
+
+	// heap上にDSCを構築
+	D3D12_DEPTH_STENCIL_VIEW_DESC desc{};
+	desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	desc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+
+	device_->CreateDepthStencilView(depthStencilResource_.Get(), &desc, dsvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart());
+}
+
 //=================================================================================================================
 //	↓PSOの内容
 //=================================================================================================================
@@ -450,6 +474,22 @@ D3D12_RASTERIZER_DESC DirectXCommon::SetRasterizerState(){
 }
 
 /// <summary>
+/// DepthStencilStateの設定
+/// </summary>
+/// <returns></returns>
+D3D12_DEPTH_STENCIL_DESC DirectXCommon::SetDepthStencilState(){
+	D3D12_DEPTH_STENCIL_DESC desc{};
+	// Depthの機能を有効化する
+	desc.DepthEnable = true;
+	// 書き込み
+	desc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+	// 地下駆ければ描画
+	desc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+
+	return desc;
+}
+
+/// <summary>
 /// PSOの生成
 /// </summary>
 void DirectXCommon::CreatePSO(){
@@ -481,6 +521,8 @@ void DirectXCommon::CreatePSO(){
 	graphicsPipelineStateDesc_.PS = { pixelShaderBlob_->GetBufferPointer(), pixelShaderBlob_->GetBufferSize() };
 	graphicsPipelineStateDesc_.BlendState = SetBlendState();
 	graphicsPipelineStateDesc_.RasterizerState = SetRasterizerState();
+	graphicsPipelineStateDesc_.DepthStencilState = SetDepthStencilState();
+	graphicsPipelineStateDesc_.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 
 	// 書き込むRTVの情報
 	graphicsPipelineStateDesc_.NumRenderTargets = 1;

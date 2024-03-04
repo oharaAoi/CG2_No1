@@ -31,7 +31,7 @@ public: // メンバ関数
 
 public: // メンバ関数
 
-	void DrawTriangle(const Matrix4x4 worldMatrix);
+	void DrawTriangle(const Matrix4x4& worldMatrix, const Vertices& vertex);
 
 private:
 
@@ -44,7 +44,7 @@ private:
 	TextureManager* textureManager_ = nullptr;
 
 	// 
-	kTriangle triangle_;
+	std::vector<kTriangle> triangle_;
 
 };
 
