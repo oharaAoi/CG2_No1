@@ -167,6 +167,9 @@
     <ClInclude Include="Lib\VertexData.h">
       <Filter>Lib</Filter>
     </ClInclude>
+    <ClInclude Include="Sprite.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Externals\ImGui\LICENSE.txt">

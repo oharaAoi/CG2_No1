@@ -100,6 +100,11 @@ public: // 生成を行うメンバ関数
 	/// </summary>
 	void CreateDSV();
 
+	/// <summary>
+	/// Viewport変換
+	/// </summary>
+	void SetViewport();
+
 //=================================================================================================================
 //	↓PSOの内容
 //=================================================================================================================
@@ -221,6 +226,9 @@ private:
 
 	// SRV用のDiscriptorHeap
 	Comptr<ID3D12DescriptorHeap> srvDiscriptorHeap_ = nullptr;
+
+	D3D12_VIEWPORT viewport_;
+	D3D12_RECT scissorRect_;
 
 public:
 	/// <summary>

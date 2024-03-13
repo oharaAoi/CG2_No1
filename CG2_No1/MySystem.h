@@ -6,6 +6,7 @@
 
 // 
 #include "Triangle.h"
+#include "Sprite.h"
 
 // 
 #include "MyMatrix.h"
@@ -31,7 +32,9 @@ public: // メンバ関数
 
 public: // メンバ関数
 
-	void DrawTriangle(const Matrix4x4& worldMatrix, const Vertices& vertex);
+	void DrawTriangle(const Matrix4x4& wvpMatrix, const Vertices& vertex);
+
+	void DrawSprite(const Matrix4x4& wvpMatrix, const RectVetex& vertex);
 
 private:
 
@@ -45,6 +48,7 @@ private:
 
 	// 
 	std::vector<kTriangle> triangle_;
+	kSprite sprite_;
 
 };
 

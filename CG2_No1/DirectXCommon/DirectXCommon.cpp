@@ -48,6 +48,9 @@ void DirectXCommon::Initialize(WinApp* win, int32_t backBufferWidth, int32_t bac
 
 	// PSOの生成
 	CreatePSO();
+
+	// viewportの設定
+	SetViewport();
 }
 
 void DirectXCommon::Finalize(){
@@ -209,6 +212,13 @@ void DirectXCommon::BeginFrame(){
 	// 描画用のDescriptorHeapの設定
 	ID3D12DescriptorHeap* descriptorHeaps[] = { srvDiscriptorHeap_.Get() };
 	commandList_->SetDescriptorHeaps(1, descriptorHeaps);
+
+	// 
+	commandList_->RSSetViewports(1, &viewport_);
+	commandList_->RSSetScissorRects(1, &scissorRect_);
+	commandList_->SetGraphicsRootSignature(rootSignature_.Get());
+	commandList_->SetPipelineState(graphicsPipelineState_.Get());
+	commandList_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
 void DirectXCommon::EndFrame(){
@@ -358,6 +368,27 @@ void DirectXCommon::CreateDSV(){
 	desc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 
 	device_->CreateDepthStencilView(depthStencilResource_.Get(), &desc, dsvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart());
+}
+
+/// <summary>
+/// 
+/// </summary>
+void DirectXCommon::SetViewport(){
+	// ビューポート
+	// クライアント領域のサイズと一緒にして画面全体を表示
+	viewport_.Width = static_cast<float>(kClientWidth_);
+	viewport_.Height = static_cast<float>(kClientHeight_);
+	viewport_.TopLeftX = 0;
+	viewport_.TopLeftY = 0;
+	viewport_.MinDepth = 0.0f;
+	viewport_.MaxDepth = 1.0f;
+
+	// シザー矩形
+	// 基本的にビューポートと同じ矩形が構成されるようにする
+	scissorRect_.left = 0;
+	scissorRect_.right = static_cast<LONG>(kClientWidth_);
+	scissorRect_.top = 0;
+	scissorRect_.bottom = static_cast<LONG>(kClientHeight_);
 }
 
 //=================================================================================================================

@@ -54,6 +54,7 @@
     <ClInclude Include="Manager\ImGuiManager.h" />
     <ClInclude Include="Manager\TextureManager.h" />
     <ClInclude Include="MySystem.h" />
+    <ClInclude Include="Sprite.h" />
     <ClInclude Include="WinApp\WinApp.h" />
   </ItemGroup>
   <ItemGroup>

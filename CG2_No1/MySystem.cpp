@@ -26,7 +26,6 @@ void MySystem::Initialize(uint32_t backBufferWidth, int32_t backBufferHeight){
     dxCommon_->Initialize(winApp_, backBufferWidth, backBufferHeight);
 	imGuiManager_->Init(winApp_, dxCommon_);
 	textureManager_->Initialize(dxCommon_);
-
 }
 
 void MySystem::Finalize(){
@@ -38,6 +37,7 @@ void MySystem::BeginFrame(){
 	imGuiManager_->Begin();
 
     dxCommon_->BeginFrame();
+
 }
 
 void MySystem::EndFrame(){
@@ -47,9 +47,10 @@ void MySystem::EndFrame(){
     dxCommon_->EndFrame();
 
 	triangle_.clear();
+	/*sprite_.clear();*/
 }
 
-void MySystem::DrawTriangle(const Matrix4x4& worldMatrix, const Vertices& vertex){
+void MySystem::DrawTriangle(const Matrix4x4& wvpMatrix, const Vertices& vertex){
 
 	int index = static_cast<int>(triangle_.size());
 
@@ -102,36 +103,11 @@ void MySystem::DrawTriangle(const Matrix4x4& worldMatrix, const Vertices& vertex
 	triangle_[index].wvpResource_ = CreateBufferResource(dxCommon_->GetDevice(), sizeof(Matrix4x4));
 	Matrix4x4* wvpData = nullptr;
 	triangle_[index].wvpResource_->Map(0, nullptr, reinterpret_cast<void**>(&wvpData));
-	// 今回は赤
-	*wvpData = worldMatrix;
-
-	// ---------------------------------------------------------------
-	// ↓ViewportとScissor
-	// ---------------------------------------------------------------
-	// ビューポート
-	// クライアント領域のサイズと一緒にして画面全体を表示
-	triangle_[index].viewport_.Width = static_cast<float>(kClientWidth_);
-	triangle_[index].viewport_.Height = static_cast<float>(kClientHeight_);
-	triangle_[index].viewport_.TopLeftX = 0;
-	triangle_[index].viewport_.TopLeftY = 0;
-	triangle_[index].viewport_.MinDepth = 0.0f;
-	triangle_[index].viewport_.MaxDepth = 1.0f;
-
-	// シザー矩形
-	// 基本的にビューポートと同じ矩形が構成されるようにする
-	triangle_[index].scissorRect_.left = 0;
-	triangle_[index].scissorRect_.right = static_cast<LONG>(kClientWidth_);
-	triangle_[index].scissorRect_.top = 0;
-	triangle_[index].scissorRect_.bottom = static_cast<LONG>(kClientHeight_);
-	// ---------------------------------------------------------------
+	
+	*wvpData = wvpMatrix;
 
 	// コマンドを積む ------------------------------------------------------------------------------
-	dxCommon_->GetCommandList()->RSSetViewports(1, &triangle_[index].viewport_);
-	dxCommon_->GetCommandList()->RSSetScissorRects(1, &triangle_[index].scissorRect_);
-	dxCommon_->GetCommandList()->SetGraphicsRootSignature(dxCommon_->GetRootSignature().Get());
-	dxCommon_->GetCommandList()->SetPipelineState(dxCommon_->GetPSO().Get());
 	dxCommon_->GetCommandList()->IASetVertexBuffers(0, 1, &triangle_[index].vertexBufferView_);
-	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	// materialCBufferの設定
 	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, triangle_[index].materialResource_->GetGPUVirtualAddress());
 	// wvpCBufferの設定
@@ -140,4 +116,71 @@ void MySystem::DrawTriangle(const Matrix4x4& worldMatrix, const Vertices& vertex
 	dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureManager_->GetSRVHandleGPU());
 
 	dxCommon_->GetCommandList()->DrawInstanced(3, 1, 0, 0);
+}
+
+void MySystem::DrawSprite(const Matrix4x4& wvpMatrix, const RectVetex& vertex) {
+	// VertexBufferViewを作成する 
+	sprite_.vertexResourceSprite = CreateBufferResource(dxCommon_->GetDevice(), sizeof(VertexData) * 6);
+	// 頂点バッファビューを作成する
+	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
+	vertexBufferView.BufferLocation = sprite_.vertexResourceSprite->GetGPUVirtualAddress();
+	// 使用するリソースのサイズは頂点6つ分
+	vertexBufferView.SizeInBytes = sizeof(VertexData) * 6;
+	// 1頂点当たりのサイズ
+	vertexBufferView.StrideInBytes = sizeof(VertexData);
+
+	VertexData* vertexDataSprite = nullptr;
+	sprite_.vertexResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataSprite));
+
+	// 頂点データを設定する
+	// 一枚目
+	vertexDataSprite[0].pos = vertex.leftBottom;	// 左下
+	vertexDataSprite[0].texcord = { 0.0f, 1.0f };
+	vertexDataSprite[1].pos = vertex.leftTop;		// 左上
+	vertexDataSprite[1].texcord = { 0.0f, 0.0f };
+	vertexDataSprite[2].pos = vertex.rightBottom;	// 右下
+	vertexDataSprite[2].texcord = { 1.0f, 1.0f };
+
+	// 二枚目
+	vertexDataSprite[3].pos = vertex.leftTop;	// 左上
+	vertexDataSprite[3].texcord = { 0.0f, 0.0f };
+	vertexDataSprite[4].pos = vertex.rightTop;	// 右上
+	vertexDataSprite[4].texcord = { 1.0f, 0.0f };
+	vertexDataSprite[5].pos = vertex.rightBottom;	// 右下
+	vertexDataSprite[5].texcord = { 1.0f, 1.0f };
+
+	// ---------------------------------------------------------------
+	// ↓Materialの設定
+	// ---------------------------------------------------------------
+	// resourceの作成
+	sprite_.materialResource_ = CreateBufferResource(dxCommon_->GetDevice(), sizeof(Vector4));
+	// データを書く
+	Vector4* materialData = nullptr;
+	// アドレスを取得
+	sprite_.materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
+	// 色を決める
+	*materialData = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+
+	// ---------------------------------------------------------------
+	// ↓Transformationの設定
+	// ---------------------------------------------------------------
+	sprite_.transfomationMatrixResourceSprite = CreateBufferResource(dxCommon_->GetDevice(), sizeof(Matrix4x4));
+	Matrix4x4* transformationMatrixDataSprite = nullptr;
+	sprite_.transfomationMatrixResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixDataSprite));
+	*transformationMatrixDataSprite = wvpMatrix;
+
+	// ---------------------------------------------------------------
+	// ↓ コマンドを積む
+	// ---------------------------------------------------------------
+	// 三角形の描画がある前提の設定なため不完全
+	// spriteの描画
+	dxCommon_->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
+	// materialCBufferの設定
+	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, sprite_.materialResource_->GetGPUVirtualAddress());
+	// TransformationMatrixCBufferの設定
+	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(1, sprite_.transfomationMatrixResourceSprite->GetGPUVirtualAddress());
+	// どのtextureを読むのかをコマンドに積む
+	dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureManager_->GetSRVHandleGPU());
+	// 描画
+	dxCommon_->GetCommandList()->DrawInstanced(6, 1, 0, 0);
 }

@@ -20,6 +20,10 @@ void Camera::Init(){
 	prijectionMatrix_ = MakePerspectiveFovMatrix(0.45f, float(1280) / float(720), 0.1f, 100.0f);
 
 	vpMatrix_ = Multiply(viewMatrix_, prijectionMatrix_);
+
+	prijectionMatrix2D_ = MakeOrthograhicMatrix(0.0f, 0.0f, float(1280), float(720), 0.0f, 100.0f);
+	viewMatrix2D_ = MakeIdentity4x4();
+	vpMatrix2D_ = Multiply(viewMatrix2D_, prijectionMatrix2D_);
 }
 
 //===========================================================================================================================

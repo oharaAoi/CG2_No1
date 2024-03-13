@@ -12,3 +12,10 @@ struct Vertices {
 	Vector4 vertex2;
 	Vector4 vertex3;
 };
+
+struct RectVetex {
+	Vector4 leftTop;
+	Vector4 rightTop;
+	Vector4 leftBottom;
+	Vector4 rightBottom;
+};

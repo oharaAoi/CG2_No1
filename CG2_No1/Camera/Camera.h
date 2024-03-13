@@ -12,6 +12,10 @@ private:
 	Matrix4x4 viewMatrix_;
 	Matrix4x4 vpMatrix_;
 
+	Matrix4x4 prijectionMatrix2D_;
+	Matrix4x4 viewMatrix2D_;
+	Matrix4x4 vpMatrix2D_;
+
 public:
 
 	Camera();
@@ -23,5 +27,7 @@ public:
 
 	/// accsser
 	Matrix4x4 GetVpMatrix() const { return vpMatrix_; }
+
+	Matrix4x4 GetVpMatrix2D() const { return vpMatrix2D_; }
 };
 
