@@ -1,6 +1,7 @@
 #pragma once
 #include "MyMatrix.h"
 #include "Transform.h"
+#include "ImGuiManager.h"
 
 class Camera{
 private:

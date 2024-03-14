@@ -10,6 +10,9 @@
 
 // 
 #include "MyMatrix.h"
+#include <cmath>
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 class MySystem{
 public: // メンバ関数
@@ -36,6 +39,17 @@ public: // メンバ関数
 
 	void DrawSprite(const Matrix4x4& wvpMatrix, const RectVetex& vertex);
 
+	void DrawSphere(const Matrix4x4& wvpMatrix);
+
+private:
+
+	struct kSphere {
+		Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource;
+		Microsoft::WRL::ComPtr<ID3D12Resource> materialResource;
+		Microsoft::WRL::ComPtr<ID3D12Resource> transfomationMatrixResource;
+		D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
+	};
+
 private:
 
 	int32_t kClientWidth_;
@@ -49,6 +63,8 @@ private:
 	// 
 	std::vector<kTriangle> triangle_;
 	kSprite sprite_;
+	kSphere sphere_;
 
+	uint32_t size;
 };
 

@@ -29,6 +29,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Matrix4x4 spriteWorldMatrix{};
 	Matrix4x4 spriteWvpMatrix{};
 
+	kTransform sphereTransform = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
+	Matrix4x4 sphereWorldMatrix{};
+	Matrix4x4 sphereWvpMatrix{};
 
 	Vertices vertex1 = {
 		{-0.5f, -0.5f, 0.0f, 1.0f},
@@ -54,6 +57,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		
 		ImGui::ShowDemoWindow();
 
+		camera->Update();
+
 		// move ----------------------------------------------------------
 		transform.rotate.y += 0.01f;
 		worldMatrix = MakeAffineMatrix(transform);
@@ -63,21 +68,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		spriteWorldMatrix = MakeAffineMatrix(spriteTransform);
 		spriteWvpMatrix = Multiply(spriteWorldMatrix, camera->GetVpMatrix2D());
 		// ---------------------------------------------------------------
+		sphereTransform.rotate.y += 0.01f;
+		sphereWorldMatrix = MakeAffineMatrix(sphereTransform);
+		sphereWvpMatrix = Multiply(sphereWorldMatrix, camera->GetVpMatrix());
 
 		// 三角形の描画
-		system->DrawTriangle(wvpMatrix, vertex1);
-		system->DrawTriangle(wvpMatrix, vertex2);
+		/*system->DrawTriangle(wvpMatrix, vertex1);
+		system->DrawTriangle(wvpMatrix, vertex2);*/
 
+		system->DrawSphere(sphereWvpMatrix);
+
+		// 2d描画
 		system->DrawSprite(spriteWvpMatrix, rect);
 
-
-		/*spriteWorldMatrix = MakeAffineMatrix(spriteTransform2);
-		spriteWvpMatrix = Multiply(spriteWorldMatrix, camera->GetVpMatrix2D());
-
-		system->DrawSprite(spriteWvpMatrix, rect);*/
-
 		ImGui::Begin("Sprite");
-		ImGui::DragFloat3("transform", &spriteTransform2.translate.x, 1);
+		ImGui::DragFloat3("transform", &spriteTransform.translate.x, 1);
 		ImGui::End();
 
 		system->EndFrame();
