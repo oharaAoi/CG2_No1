@@ -9,6 +9,10 @@
 #include "Sprite.h"
 
 // 
+#include "Material.h"
+//#include "Transform.h"
+
+// 
 #include "MyMatrix.h"
 #include <cmath>
 #define _USE_MATH_DEFINES
@@ -37,9 +41,9 @@ public: // メンバ関数
 
 	void DrawTriangle(const Matrix4x4& wvpMatrix, const Vertices& vertex);
 
-	void DrawSprite(const Matrix4x4& wvpMatrix, const RectVetex& vertex);
+	void DrawSprite(const Matrix4x4& worldMatrix, const Matrix4x4& wvpMatrix, const RectVetex& vertex);
 
-	void DrawSphere(const Matrix4x4& wvpMatrix);
+	void DrawSphere(const Matrix4x4& worldMatrix, const Matrix4x4& wvpMatrix);
 
 private:
 
@@ -66,5 +70,7 @@ private:
 	kSphere sphere_;
 
 	uint32_t size;
+
+	bool useMonstorBall_;
 };
 

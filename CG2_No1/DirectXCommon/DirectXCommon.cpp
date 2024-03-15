@@ -129,6 +129,15 @@ void DirectXCommon::InitializeDXGDevice(){
 	assert(device_ != nullptr);
 	Log("complete create D3D12Device\n");
 
+	// サイズを初期化しておく
+	if (!descriptorSize_) {
+		descriptorSize_ = std::make_unique<DescriptorSize>(
+			device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV),
+			device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV),
+			device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV)
+		);
+	}
+
 #ifdef _DEBUG
 
 	Comptr<ID3D12InfoQueue> infoQueue = nullptr;
@@ -199,7 +208,7 @@ void DirectXCommon::BeginFrame(){
 	// ---------------------------------------------------------------
 
 	// 描画先のRTVとDSVを設定する
-	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart();
+	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = GetCPUDescriptorHandle(dsvDescriptorHeap_.Get(), descriptorSize_->GetDSV(), 0);
 	// 描画先のRTVを設定
 	commandList_->OMSetRenderTargets(1, &rtvHandles_[backBufferIndex], false, &dsvHandle);
 	// 色で画面全体をクリアする
@@ -330,7 +339,7 @@ void DirectXCommon::CreateRTV(){
 	rtvDesc_.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 	rtvDesc_.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 	// 先頭を取得
-	D3D12_CPU_DESCRIPTOR_HANDLE rtvStartHandle = rtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvStartHandle = GetCPUDescriptorHandle(rtvDescriptorHeap.Get(), descriptorSize_->GetRTV(), 0);
 	// 一つ目のDiscriptaの生成
 	rtvHandles_[0] = rtvStartHandle;
 	device_->CreateRenderTargetView(swapChainResource_[0].Get(), &rtvDesc_, rtvHandles_[0]);
@@ -531,7 +540,7 @@ void DirectXCommon::CreatePSO(){
 	ShaderCompile();
 
 	// --------------------------------------------------------------------
-	D3D12_INPUT_ELEMENT_DESC desc[2] = {};
+	D3D12_INPUT_ELEMENT_DESC desc[3] = {};
 	desc[0].SemanticName = "POSITION";
 	desc[0].SemanticIndex = 0;
 	desc[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
@@ -541,6 +550,11 @@ void DirectXCommon::CreatePSO(){
 	desc[1].SemanticIndex = 0;
 	desc[1].Format = DXGI_FORMAT_R32G32_FLOAT;
 	desc[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+
+	desc[2].SemanticName = "NORMAL";
+	desc[2].SemanticIndex = 0;
+	desc[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	desc[2].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
 
 	inputLayoutDesc_.pInputElementDescs = desc;
 	inputLayoutDesc_.NumElements = _countof(desc);

@@ -76,10 +76,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		/*system->DrawTriangle(wvpMatrix, vertex1);
 		system->DrawTriangle(wvpMatrix, vertex2);*/
 
-		system->DrawSphere(sphereWvpMatrix);
+		system->DrawSphere(sphereWorldMatrix, sphereWvpMatrix);
 
 		// 2d描画
-		system->DrawSprite(spriteWvpMatrix, rect);
+		system->DrawSprite(spriteWorldMatrix, spriteWvpMatrix, rect);
 
 		ImGui::Begin("Sprite");
 		ImGui::DragFloat3("transform", &spriteTransform.translate.x, 1);

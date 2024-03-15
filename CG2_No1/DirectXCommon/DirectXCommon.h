@@ -3,6 +3,7 @@
 #include <dxgi1_6.h>
 #include "dxgidebug.h"
 #include <cassert>
+#include <memory>
 
 #include <wrl.h>
 
@@ -13,8 +14,9 @@
 #include "Function/Debug.h"
 
 #include "VertexData.h"
+#include "DescriptorSize.h"
 
-class DirectXCommon{
+class DirectXCommon {
 public: // メンバ関数
 
 	/// <summary>
@@ -50,6 +52,12 @@ public: // accsesser
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> GetPSO() { return graphicsPipelineState_; }
 
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> GetSRVDiscriptorHeap() { return srvDiscriptorHeap_; }
+
+	uint32_t GetDescriptorSizeSRV() { return descriptorSize_->GetSRV(); }
+
+	uint32_t GetDescriptorSizeRTV() { return descriptorSize_->GetRTV(); }
+
+	uint32_t GetDescriptorSizeDSV() { return descriptorSize_->GetDSV(); }
 
 public: // 色々な設定をしているメンバ関数
 
@@ -94,7 +102,7 @@ public: // 生成を行うメンバ関数
 	/// Fenceの生成
 	/// </summary>
 	void CrateFence();
-	
+
 	/// <summary>
 	/// DSVの設定をする
 	/// </summary>
@@ -105,12 +113,12 @@ public: // 生成を行うメンバ関数
 	/// </summary>
 	void SetViewport();
 
-//=================================================================================================================
-//	↓PSOの内容
-//=================================================================================================================
-	/// <summary>
-	/// RootSignatureの生成
-	/// </summary>
+	//=================================================================================================================
+	//	↓PSOの内容
+	//=================================================================================================================
+		/// <summary>
+		/// RootSignatureの生成
+		/// </summary>
 	void CreateRootSignature();
 
 	/// <summary>
@@ -144,7 +152,7 @@ public: // 生成を行うメンバ関数
 	/// </summary>
 	void CreatePSO();
 
-//=================================================================================================================
+	//=================================================================================================================
 
 private:
 
@@ -154,7 +162,7 @@ private:
 	int32_t kClientWidth_;
 	int32_t kClientHeight_;
 
-	UINT bufferCount_; 
+	UINT bufferCount_;
 
 	/// <summary>///
 	/// objectが不要になった時に自動でRelese
@@ -182,7 +190,7 @@ private:
 
 	// DescriptorHeap
 	Comptr<ID3D12DescriptorHeap> rtvDescriptorHeap = nullptr;
-	
+
 	// rtv
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc_;
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandles_[2];
@@ -204,10 +212,10 @@ private:
 	Comptr<ID3D12Resource> depthStencilResource_ = nullptr;
 	Comptr<ID3D12DescriptorHeap> dsvDescriptorHeap_ = nullptr;
 
-//=================================================================================================================
-//	↓PSOの内容
-//=================================================================================================================
-	// rootSignature
+	//=================================================================================================================
+	//	↓PSOの内容
+	//=================================================================================================================
+		// rootSignature
 	Comptr<ID3DBlob> signatureBlob_ = nullptr;
 	Comptr<ID3DBlob> errorBlob_ = nullptr;
 	Comptr<ID3D12RootSignature> rootSignature_ = nullptr;
@@ -222,13 +230,17 @@ private:
 	// PSO
 	Comptr<ID3D12PipelineState> graphicsPipelineState_ = nullptr;
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc_;
-//=================================================================================================================
+	//=================================================================================================================
 
-	// SRV用のDiscriptorHeap
+		// SRV用のDiscriptorHeap
 	Comptr<ID3D12DescriptorHeap> srvDiscriptorHeap_ = nullptr;
 
 	D3D12_VIEWPORT viewport_;
 	D3D12_RECT scissorRect_;
+
+private:
+
+	std::unique_ptr<DescriptorSize> descriptorSize_;
 
 public:
 	/// <summary>

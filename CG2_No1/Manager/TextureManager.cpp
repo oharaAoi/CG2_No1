@@ -9,10 +9,26 @@ TextureManager* TextureManager::GetInstacne() {
 //	↓初期化
 //=================================================================================================================
 void TextureManager::Initialize(DirectXCommon* dxCommon){
-	mipImage_ = LoadTexture("Resource/uvChecker.png");
-	const DirectX::TexMetadata& metadata = mipImage_.GetMetadata();
-	textureResource_ = CreateTextureResource(dxCommon->GetDevice(), metadata);
-	intermediateResource_ = UploadTextureData(textureResource_, mipImage_, dxCommon->GetDevice(), dxCommon->GetCommandList());
+	assert(dxCommon);
+
+	dxCommon_ = dxCommon;
+
+	srvData_.clear();
+	CreateShaderResource("Resource/uvChecker.png");
+	CreateShaderResource("Resource/monsterBall.png");
+}
+
+void TextureManager::Finalize(){
+}
+
+void TextureManager::CreateShaderResource(const std::string& filePath) {
+
+	SRVData data{};
+
+	DirectX::ScratchImage mipImage = LoadTexture(filePath);
+	const DirectX::TexMetadata& metadata = mipImage.GetMetadata();
+	data.textureResource_ = CreateTextureResource(dxCommon_->GetDevice(), metadata);
+	data.intermediateResource_ = UploadTextureData(data.textureResource_, mipImage, dxCommon_->GetDevice(), dxCommon_->GetCommandList());
 
 	// ------------------------------------------------------------
 	// metadataを元にSRVの設定
@@ -24,17 +40,17 @@ void TextureManager::Initialize(DirectXCommon* dxCommon){
 
 	// ------------------------------------------------------------
 	// SRVを作成するDescriptorHeapの場所を求める
-	srvHandleCPU_ = dxCommon->GetSRVDiscriptorHeap()->GetCPUDescriptorHandleForHeapStart();
-	srvHandleGPU_ = dxCommon->GetSRVDiscriptorHeap()->GetGPUDescriptorHandleForHeapStart();
+	data.srvHandleCPU_ = GetCPUDescriptorHandle(dxCommon_->GetSRVDiscriptorHeap().Get(), dxCommon_->GetDescriptorSizeSRV(), (int(srvData_.size()) + 1));
+	data.srvHandleGPU_ = GetGPUDescriptorHandle(dxCommon_->GetSRVDiscriptorHeap().Get(), dxCommon_->GetDescriptorSizeSRV(), (int(srvData_.size()) + 1));
 	// 先頭はImGuiが使っている溜めその次を使う
-	srvHandleCPU_.ptr += dxCommon->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	srvHandleGPU_.ptr += dxCommon->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	data.srvHandleCPU_.ptr += dxCommon_->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	data.srvHandleGPU_.ptr += dxCommon_->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
+	// 配列に入れる
+	srvData_.push_back(data);
 
 	// 生成
-	dxCommon->GetDevice()->CreateShaderResourceView(textureResource_.Get(), &srvDesc, srvHandleCPU_);
-}
-
-void TextureManager::Finalize(){
+	dxCommon_->GetDevice()->CreateShaderResourceView(data.textureResource_.Get(), &srvDesc, data.srvHandleCPU_);
 }
 
 //=================================================================================================================

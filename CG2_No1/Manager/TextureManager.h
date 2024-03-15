@@ -20,7 +20,8 @@ public: // メンバ関数
 
 public:
 
-	D3D12_GPU_DESCRIPTOR_HANDLE GetSRVHandleGPU() { return srvHandleGPU_; }
+	//D3D12_GPU_DESCRIPTOR_HANDLE GetSRVHandleGPU() { return srvHandleGPU_; }
+	D3D12_GPU_DESCRIPTOR_HANDLE GetSRVHandleGPU(uint32_t index) { return srvData_[index].srvHandleGPU_; }
 
 public:
 
@@ -36,6 +37,8 @@ public:
 	void Initialize(DirectXCommon* dxCommon);
 
 	void Finalize();
+
+	void CreateShaderResource(const std::string& filePath);
 
 	/// <summary>
 	/// Textrueデータを読む
@@ -69,12 +72,24 @@ public:
 
 private:
 
-	DirectX::ScratchImage mipImage_;
+	DirectXCommon* dxCommon_;
+
+	/*DirectX::ScratchImage mipImage_;
 	Microsoft::WRL::ComPtr<ID3D12Resource> textureResource_;
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResource_ = nullptr;
 
 	D3D12_CPU_DESCRIPTOR_HANDLE srvHandleCPU_;
-	D3D12_GPU_DESCRIPTOR_HANDLE srvHandleGPU_;
+	D3D12_GPU_DESCRIPTOR_HANDLE srvHandleGPU_;*/
+
+	struct SRVData {
+		Microsoft::WRL::ComPtr<ID3D12Resource> textureResource_ = nullptr;
+		Microsoft::WRL::ComPtr<ID3D12Resource> intermediateResource_ = nullptr;
+
+		D3D12_CPU_DESCRIPTOR_HANDLE srvHandleCPU_;
+		D3D12_GPU_DESCRIPTOR_HANDLE srvHandleGPU_;
+	};
+
+	std::vector<SRVData> srvData_;
 };
 
