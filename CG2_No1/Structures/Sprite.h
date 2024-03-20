@@ -5,7 +5,9 @@
 
 struct kSprite {
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResourceSprite;
+	Microsoft::WRL::ComPtr<ID3D12Resource> indexResourceSprite;
 	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource_;
 	Microsoft::WRL::ComPtr<ID3D12Resource> transfomationMatrixResourceSprite;
+	Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightResource;
 };
 

@@ -1,5 +1,9 @@
 #include "MySystem.h"
 
+MySystem::MySystem(){
+	
+}
+
 MySystem::~MySystem(){
 
 }
@@ -28,6 +32,9 @@ void MySystem::Initialize(uint32_t backBufferWidth, int32_t backBufferHeight){
 	textureManager_->Initialize(dxCommon_);
 
 	useMonstorBall_ = true;
+
+	/*light_ = std::make_unique<Light>();
+	light_->directionalLight_ = std::make_unique<DirectionalLight>();*/
 }
 
 void MySystem::Finalize(){
@@ -111,7 +118,6 @@ void MySystem::DrawTriangle(const Matrix4x4& wvpMatrix, const Vertices& vertex){
 	triangle_[index].wvpResource_ = CreateBufferResource(dxCommon_->GetDevice(), sizeof(Matrix4x4));
 	Matrix4x4* wvpData = nullptr;
 	triangle_[index].wvpResource_->Map(0, nullptr, reinterpret_cast<void**>(&wvpData));
-	
 	*wvpData = wvpMatrix;
 
 	// コマンドを積む ------------------------------------------------------------------------------
@@ -126,14 +132,14 @@ void MySystem::DrawTriangle(const Matrix4x4& wvpMatrix, const Vertices& vertex){
 	dxCommon_->GetCommandList()->DrawInstanced(3, 1, 0, 0);
 }
 
-void MySystem::DrawSprite(const Matrix4x4& worldMatrix, const Matrix4x4& wvpMatrix, const RectVetex& vertex) {
+void MySystem::DrawSprite(const Matrix4x4& worldMatrix, const Matrix4x4& wvpMatrix, const RectVetex& vertex, const kTransform& transrom) {
 	// VertexBufferViewを作成する 
-	sprite_.vertexResourceSprite = CreateBufferResource(dxCommon_->GetDevice(), sizeof(VertexData) * 6);
+	sprite_.vertexResourceSprite = CreateBufferResource(dxCommon_->GetDevice(), sizeof(VertexData) * 4);
 	// 頂点バッファビューを作成する
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
 	vertexBufferView.BufferLocation = sprite_.vertexResourceSprite->GetGPUVirtualAddress();
 	// 使用するリソースのサイズは頂点6つ分
-	vertexBufferView.SizeInBytes = sizeof(VertexData) * 6;
+	vertexBufferView.SizeInBytes = sizeof(VertexData) * 4;
 	// 1頂点当たりのサイズ
 	vertexBufferView.StrideInBytes = sizeof(VertexData);
 
@@ -151,17 +157,39 @@ void MySystem::DrawSprite(const Matrix4x4& worldMatrix, const Matrix4x4& wvpMatr
 	vertexDataSprite[2].pos = vertex.rightBottom;	// 右下
 	vertexDataSprite[2].texcord = { 1.0f, 1.0f };
 	vertexDataSprite[2].normal = { 0.0f, 0.0f, -1.0f };
+	vertexDataSprite[3].pos = vertex.rightTop;	// 右上
+	vertexDataSprite[3].texcord = { 1.0f, 0.0f };
+	vertexDataSprite[3].normal = { 0.0f, 0.0f, -1.0f };
 
 	// 二枚目
-	vertexDataSprite[3].pos = vertex.leftTop;	// 左上
-	vertexDataSprite[3].texcord = { 0.0f, 0.0f };
-	vertexDataSprite[3].normal = { 0.0f, 0.0f, -1.0f };
-	vertexDataSprite[4].pos = vertex.rightTop;	// 右上
-	vertexDataSprite[4].texcord = { 1.0f, 0.0f };
-	vertexDataSprite[4].normal = { 0.0f, 0.0f, -1.0f };
-	vertexDataSprite[5].pos = vertex.rightBottom;	// 右下
-	vertexDataSprite[5].texcord = { 1.0f, 1.0f };
-	vertexDataSprite[5].normal = { 0.0f, 0.0f, -1.0f };
+	//vertexDataSprite[3].pos = vertex.leftTop;	// 左上
+	//vertexDataSprite[3].texcord = { 0.0f, 0.0f };
+	//vertexDataSprite[3].normal = { 0.0f, 0.0f, -1.0f };
+	//vertexDataSprite[4].pos = vertex.rightTop;	// 右上
+	//vertexDataSprite[4].texcord = { 1.0f, 0.0f };
+	//vertexDataSprite[4].normal = { 0.0f, 0.0f, -1.0f };
+	//vertexDataSprite[5].pos = vertex.rightBottom;	// 右下
+	//vertexDataSprite[5].texcord = { 1.0f, 1.0f };
+	//vertexDataSprite[5].normal = { 0.0f, 0.0f, -1.0f };
+
+	// ---------------------------------------------------------------
+	// ↓Indexの設定
+	// ---------------------------------------------------------------
+	sprite_.indexResourceSprite = CreateBufferResource(dxCommon_->GetDevice(), sizeof(uint32_t) * 6);
+	D3D12_INDEX_BUFFER_VIEW indexBufferView{};
+	indexBufferView.BufferLocation = sprite_.indexResourceSprite->GetGPUVirtualAddress();
+	indexBufferView.SizeInBytes = sizeof(uint32_t) * 6;
+	indexBufferView.Format = DXGI_FORMAT_R32_UINT;
+
+	uint32_t* indexDataSprite = nullptr;
+	sprite_.indexResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&indexDataSprite));
+	indexDataSprite[0] = 0;
+	indexDataSprite[1] = 1;
+	indexDataSprite[2] = 2;
+
+	indexDataSprite[3] = 1;
+	indexDataSprite[4] = 3;
+	indexDataSprite[5] = 2;
 
 	// ---------------------------------------------------------------
 	// ↓Materialの設定
@@ -176,6 +204,12 @@ void MySystem::DrawSprite(const Matrix4x4& worldMatrix, const Matrix4x4& wvpMatr
 	materialData->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	materialData->enableLigthing = false;
 
+	Matrix4x4 uvTransformMatrix = MakeScaleMatrix(transrom.scale);
+	uvTransformMatrix = Multiply(uvTransformMatrix, MakeRotateZMatrix(transrom.rotate.z));
+	uvTransformMatrix = Multiply(uvTransformMatrix, MakeTranslateMatrix(transrom.translate));
+	materialData->uvTransform = uvTransformMatrix;
+	
+
 	// ---------------------------------------------------------------
 	// ↓Transformationの設定
 	// ---------------------------------------------------------------
@@ -186,11 +220,18 @@ void MySystem::DrawSprite(const Matrix4x4& worldMatrix, const Matrix4x4& wvpMatr
 	transformationMatrixDataSprite->World = worldMatrix;
 
 	// ---------------------------------------------------------------
+	// ↓Lightの設定
+	// ---------------------------------------------------------------
+	
+
+	// ---------------------------------------------------------------
 	// ↓ コマンドを積む
 	// ---------------------------------------------------------------
 	// 三角形の描画がある前提の設定なため不完全
 	// spriteの描画
 	dxCommon_->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
+	//
+	dxCommon_->GetCommandList()->IASetIndexBuffer(&indexBufferView);
 	// materialCBufferの設定
 	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, sprite_.materialResource_->GetGPUVirtualAddress());
 	// TransformationMatrixCBufferの設定
@@ -198,7 +239,8 @@ void MySystem::DrawSprite(const Matrix4x4& worldMatrix, const Matrix4x4& wvpMatr
 	// どのtextureを読むのかをコマンドに積む
 	dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureManager_->GetSRVHandleGPU(0));
 	// 描画
-	dxCommon_->GetCommandList()->DrawInstanced(6, 1, 0, 0);
+	//dxCommon_->GetCommandList()->DrawInstanced(6, 1, 0, 0);
+	dxCommon_->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
 
 void MySystem::DrawSphere(const Matrix4x4& worldMatrix, const Matrix4x4& wvpMatrix){
@@ -212,7 +254,6 @@ void MySystem::DrawSphere(const Matrix4x4& worldMatrix, const Matrix4x4& wvpMatr
 	// ---------------------------------------------------------------
 	// ↓Vetrtexの設定
 	// ---------------------------------------------------------------
-
 	sphere_.vertexResource = CreateBufferResource(dxCommon_->GetDevice(), size * sizeof(VertexData));
 	// 頂点バッファビューを作成する 
 	sphere_.vertexBufferView.BufferLocation = sphere_.vertexResource->GetGPUVirtualAddress();
@@ -224,13 +265,27 @@ void MySystem::DrawSphere(const Matrix4x4& worldMatrix, const Matrix4x4& wvpMatr
 	VertexData* vertexData = nullptr;
 	sphere_.vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
 	uint32_t start = 0;
+
+	// ---------------------------------------------------------------
+	// ↓Indexの設定
+	// ---------------------------------------------------------------
+	sphere_.indexResource = CreateBufferResource(dxCommon_->GetDevice(), size * (sizeof(uint32_t)));
+	D3D12_INDEX_BUFFER_VIEW indexBufferView{};
+	indexBufferView.BufferLocation = sphere_.indexResource->GetGPUVirtualAddress();
+	indexBufferView.SizeInBytes = size * (sizeof(uint32_t));
+	indexBufferView.Format = DXGI_FORMAT_R32_UINT;
+
+	uint32_t* indexData = nullptr;
+	sphere_.indexResource->Map(0, nullptr, reinterpret_cast<void**>(&indexData));
+	uint32_t startIndex = 0;
+
 	// 頂点データの設定
 	// 緯度方向に分割
 	for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex) {
 		float lat = -float(M_PI) / 2.0f + kLatEvery * latIndex; // theta
 		// 経度方向に分割
 		for (uint32_t lonIndex = 0; lonIndex < kSubdivision; ++lonIndex) {
-			start = (latIndex * kSubdivision + lonIndex) * 6;
+			start = (latIndex * kSubdivision + lonIndex) * 4;
 			float lon = lonIndex * kLonEvery; // fai
 			// 頂点データを入力
 			// a 左下
@@ -264,17 +319,6 @@ void MySystem::DrawSphere(const Matrix4x4& worldMatrix, const Matrix4x4& wvpMatr
 			keepVertexData.normal = { keepVertexData.pos.x, keepVertexData.pos.y, keepVertexData.pos.z };
 			vertexData[start + 2] = keepVertexData;
 
-			// 2枚目
-			// 左上
-			keepVertexData.pos.x = std::cos(lat + kLatEvery) * std::cos(lon);
-			keepVertexData.pos.y = std::sin(lat + kLatEvery);
-			keepVertexData.pos.z = std::cos(lat + kLatEvery) * std::sin(lon);
-			keepVertexData.pos.w = 1.0f;
-			keepVertexData.texcord.x = float(lonIndex) / float(kSubdivision);
-			keepVertexData.texcord.y = 1.0f - float(latIndex + 1) / float(kSubdivision);
-			keepVertexData.normal = { keepVertexData.pos.x, keepVertexData.pos.y, keepVertexData.pos.z };
-			vertexData[start + 3] = keepVertexData;
-
 			// d 右上
 			keepVertexData.pos.x = std::cos(lat + kLatEvery) * std::cos(lon + kLonEvery);
 			keepVertexData.pos.y = std::sin(lat + kLatEvery);
@@ -282,17 +326,18 @@ void MySystem::DrawSphere(const Matrix4x4& worldMatrix, const Matrix4x4& wvpMatr
 			keepVertexData.pos.w = 1.0f;
 			keepVertexData.texcord.x = float(lonIndex + 1) / float(kSubdivision);
 			keepVertexData.texcord.y = 1.0f - float(latIndex + 1) / float(kSubdivision);
-			vertexData[start + 4] = keepVertexData;
-
-			// 右下
-			keepVertexData.pos.x = std::cos(lat) * std::cos(lon + kLonEvery);
-			keepVertexData.pos.y = std::sin(lat);
-			keepVertexData.pos.z = std::cos(lat) * std::sin(lon + kLonEvery);
-			keepVertexData.pos.w = 1.0f;
-			keepVertexData.texcord.x = float(lonIndex + 1) / float(kSubdivision);
-			keepVertexData.texcord.y = 1.0f - float(latIndex) / float(kSubdivision);
 			keepVertexData.normal = { keepVertexData.pos.x, keepVertexData.pos.y, keepVertexData.pos.z };
-			vertexData[start + 5] = keepVertexData;
+			vertexData[start + 3] = keepVertexData;
+
+			//
+			startIndex = (latIndex * kSubdivision + lonIndex) * 6;
+			indexData[startIndex] = start;
+			indexData[startIndex + 1] = start + 1;
+			indexData[startIndex + 2] = start + 2;
+
+			indexData[startIndex + 3] = start + 1;
+			indexData[startIndex + 4] = start + 3;
+			indexData[startIndex + 5] = start + 2;
 		}
 	}
 
@@ -308,6 +353,7 @@ void MySystem::DrawSphere(const Matrix4x4& worldMatrix, const Matrix4x4& wvpMatr
 	// 色を決める
 	materialData->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	materialData->enableLigthing = true;
+	materialData->uvTransform = MakeIdentity4x4();
 
 	// ---------------------------------------------------------------
 	// ↓Transformationの設定
@@ -319,17 +365,41 @@ void MySystem::DrawSphere(const Matrix4x4& worldMatrix, const Matrix4x4& wvpMatr
 	transformationMatrixDataSprite->World = worldMatrix;
 
 	// ---------------------------------------------------------------
+	// ↓Lightingの設定
+	// ---------------------------------------------------------------
+	/*DirectionalLight* rawPointer = directionalLight_.get();
+	sphere_.directionalLightResource = CreateBufferResource(dxCommon_->GetDevice(), sizeof(DirectionalLight));
+	sphere_.directionalLightResource->Map(0, nullptr, reinterpret_cast<void**>(&directionalLight_));
+	directionalLight_->SetLight(
+		{ 1.0f,1.0f, 1.0f, 1.0f },
+		{ 0.0f, -1.0f, 0.0f },
+		1.0f
+	);*/
+
+	Light* light = nullptr;
+	sphere_.directionalLightResource = CreateBufferResource(dxCommon_->GetDevice(), sizeof(Light));
+	sphere_.directionalLightResource->Map(0, nullptr, reinterpret_cast<void**>(&light));
+	light->color_ = { 1.0f,1.0f, 1.0f, 1.0f };
+	light->direction_ = { 0.0f, -1.0f, 0.0f };
+	light->intensity_ = 1.0f;
+
+	// ---------------------------------------------------------------
 	// ↓ コマンドを積む
 	// ---------------------------------------------------------------
 	// 三角形の描画がある前提の設定なため不完全
 	// spriteの描画
 	dxCommon_->GetCommandList()->IASetVertexBuffers(0, 1, &sphere_.vertexBufferView);
+	//
+	dxCommon_->GetCommandList()->IASetIndexBuffer(&indexBufferView);
 	// materialCBufferの設定
 	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, sphere_.materialResource->GetGPUVirtualAddress());
 	// TransformationMatrixCBufferの設定
 	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(1, sphere_.transfomationMatrixResource->GetGPUVirtualAddress());
+	// 
+	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(3, sphere_.directionalLightResource->GetGPUVirtualAddress());
 	// どのtextureを読むのかをコマンドに積む
 	dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(2, useMonstorBall_ ? textureManager_->GetSRVHandleGPU(1) : textureManager_->GetSRVHandleGPU(0));
 	// 描画
-	dxCommon_->GetCommandList()->DrawInstanced(1536, 1, 0, 0);
+	//dxCommon_->GetCommandList()->DrawInstanced(1536, 1, 0, 0);
+	dxCommon_->GetCommandList()->DrawIndexedInstanced(size, 1, 0, 0, 0);
 }

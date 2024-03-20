@@ -26,6 +26,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	kTransform spriteTransform = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
 	kTransform spriteTransform2 = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {640.0f, 0.0f, 0.0f} };
+	kTransform uvTransformSprite = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
 	Matrix4x4 spriteWorldMatrix{};
 	Matrix4x4 spriteWvpMatrix{};
 
@@ -79,10 +80,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		system->DrawSphere(sphereWorldMatrix, sphereWvpMatrix);
 
 		// 2d描画
-		system->DrawSprite(spriteWorldMatrix, spriteWvpMatrix, rect);
+		system->DrawSprite(spriteWorldMatrix, spriteWvpMatrix, rect, uvTransformSprite);
 
 		ImGui::Begin("Sprite");
 		ImGui::DragFloat3("transform", &spriteTransform.translate.x, 1);
+		ImGui::DragFloat2("UVTransform", &uvTransformSprite.translate.x, 0.01f, -1.0f, 10.0f);
+		ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -1.0f, 10.0f);
+		ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
+
 		ImGui::End();
 
 		system->EndFrame();

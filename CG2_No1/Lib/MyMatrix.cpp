@@ -282,7 +282,7 @@ Matrix4x4 MakeAffineMatrix(const kTransform& transform) {
     Matrix4x4 translateMatrix{};
     Matrix4x4 affineMatrix{};
 
-    scaleMatrix = MakeScaleMatrix(transform.scalel);
+    scaleMatrix = MakeScaleMatrix(transform.scale);
     rotateMatrix = MakeRotateXYZMatrix(transform.rotate);
     translateMatrix = MakeTranslateMatrix(transform.translate);
 

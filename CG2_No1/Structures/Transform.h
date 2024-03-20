@@ -8,7 +8,7 @@ struct TramsformationMatrix {
 };
 
 struct kTransform {
-	Vector3 scalel;
+	Vector3 scale;
 	Vector3 rotate;
 	Vector3 translate;
 };

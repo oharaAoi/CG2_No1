@@ -22,7 +22,10 @@
     <ClCompile Include="Externals\ImGui\imgui_widgets.cpp" />
     <ClCompile Include="Function\Convert.cpp" />
     <ClCompile Include="Function\DirectXUtils.cpp" />
+    <ClCompile Include="Lib\MyMath.cpp" />
     <ClCompile Include="Lib\MyMatrix.cpp" />
+    <ClCompile Include="Light\BaseLight.cpp" />
+    <ClCompile Include="Light\DirectionalLight.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Manager\ImGuiManager.cpp" />
     <ClCompile Include="Manager\TextureManager.cpp" />
@@ -44,12 +47,16 @@
     <ClInclude Include="Function\Convert.h" />
     <ClInclude Include="Function\Debug.h" />
     <ClInclude Include="Function\DirectXUtils.h" />
+    <ClInclude Include="Lib\MyMath.h" />
     <ClInclude Include="Lib\MyMatrix.h" />
+    <ClInclude Include="Light\BaseLight.h" />
+    <ClInclude Include="Light\DirectionalLight.h" />
     <ClInclude Include="Manager\ImGuiManager.h" />
     <ClInclude Include="Manager\TextureManager.h" />
     <ClInclude Include="MySystem.h" />
     <ClInclude Include="Structures\DescriptorSize.h" />
     <ClInclude Include="Structures\Material.h" />
+    <ClInclude Include="Structures\Matrix3x3.h" />
     <ClInclude Include="Structures\Matrix4x4.h" />
     <ClInclude Include="Structures\Sprite.h" />
     <ClInclude Include="Structures\Transform.h" />
@@ -125,7 +132,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir)\DirectXCommon\;$(ProjectDir)\Manager\;$(ProjectDir)\WinApp\;$(ProjectDir)\Structures\;$(ProjectDir)\Lib\;$(ProjectDir)\Externals\DirectXTex\;$(ProjectDir)\HLSL\;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\Light\;$(ProjectDir)\DirectXCommon\;$(ProjectDir)\Manager\;$(ProjectDir)\WinApp\;$(ProjectDir)\Structures\;$(ProjectDir)\Lib\;$(ProjectDir)\Externals\DirectXTex\;$(ProjectDir)\HLSL\;$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

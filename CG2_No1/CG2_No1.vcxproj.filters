@@ -40,6 +40,9 @@
     <Filter Include="Structures">
       <UniqueIdentifier>{2cde3741-c038-490e-86a6-dfb4bc072faf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Light">
+      <UniqueIdentifier>{b62ee61b-4653-47b1-89eb-c30083ea8cd6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -95,6 +98,15 @@
     </ClCompile>
     <ClCompile Include="Structures\DescriptorSize.cpp">
       <Filter>Structures</Filter>
+    </ClCompile>
+    <ClCompile Include="Light\BaseLight.cpp">
+      <Filter>Light</Filter>
+    </ClCompile>
+    <ClCompile Include="Light\DirectionalLight.cpp">
+      <Filter>Light</Filter>
+    </ClCompile>
+    <ClCompile Include="Lib\MyMath.cpp">
+      <Filter>Lib</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -180,6 +192,18 @@
       <Filter>Structures</Filter>
     </ClInclude>
     <ClInclude Include="Structures\VertexData.h">
+      <Filter>Structures</Filter>
+    </ClInclude>
+    <ClInclude Include="Light\BaseLight.h">
+      <Filter>Light</Filter>
+    </ClInclude>
+    <ClInclude Include="Light\DirectionalLight.h">
+      <Filter>Light</Filter>
+    </ClInclude>
+    <ClInclude Include="Lib\MyMath.h">
+      <Filter>Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="Structures\Matrix3x3.h">
       <Filter>Structures</Filter>
     </ClInclude>
   </ItemGroup>
