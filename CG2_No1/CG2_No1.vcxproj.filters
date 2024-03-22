@@ -43,6 +43,9 @@
     <Filter Include="Light">
       <UniqueIdentifier>{b62ee61b-4653-47b1-89eb-c30083ea8cd6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Object">
+      <UniqueIdentifier>{a0075be5-0524-4d87-8ed7-4f6f9730a8d0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -107,6 +110,18 @@
     </ClCompile>
     <ClCompile Include="Lib\MyMath.cpp">
       <Filter>Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="Structures\Model.cpp">
+      <Filter>Structures</Filter>
+    </ClCompile>
+    <ClCompile Include="Structures\Material.cpp">
+      <Filter>Structures</Filter>
+    </ClCompile>
+    <ClCompile Include="Object\Triangle.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -179,9 +194,6 @@
     <ClInclude Include="Structures\Transform.h">
       <Filter>Structures</Filter>
     </ClInclude>
-    <ClInclude Include="Structures\Triangle.h">
-      <Filter>Structures</Filter>
-    </ClInclude>
     <ClInclude Include="Structures\Vector2.h">
       <Filter>Structures</Filter>
     </ClInclude>
@@ -205,6 +217,15 @@
     </ClInclude>
     <ClInclude Include="Structures\Matrix3x3.h">
       <Filter>Structures</Filter>
+    </ClInclude>
+    <ClInclude Include="Structures\Model.h">
+      <Filter>Structures</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Triangle.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

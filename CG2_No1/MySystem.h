@@ -10,8 +10,10 @@
 
 // 
 #include "Transform.h"
-#include "Triangle.h"
 #include "Sprite.h"
+#include "Model.h"
+
+#include "Triangle.h"
 
 // 
 #include "Material.h"
@@ -42,6 +44,14 @@ public: // メンバ関数
 	void BeginFrame();
 	void EndFrame();
 
+public:
+
+	void CreateTriangle(Triangle* triangle, const Vertices& vertex);
+
+public:
+
+	void DrawTriangle(Triangle* triangle);
+
 public: // メンバ関数
 
 	void DrawTriangle(const Matrix4x4& wvpMatrix, const Vertices& vertex);
@@ -52,6 +62,8 @@ public: // メンバ関数
 
 	void DrawSphere(const Matrix4x4& worldMatrix, const Matrix4x4& wvpMatrix);
 
+	void DrawModel(const Matrix4x4& worldMatrix, const Matrix4x4& wvpMatrix);
+
 private:
 
 	struct kSphere {
@@ -61,7 +73,15 @@ private:
 		Microsoft::WRL::ComPtr<ID3D12Resource> transfomationMatrixResource;
 		Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightResource;
 		D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
-		
+	};
+
+	struct Model {
+		Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource;
+		Microsoft::WRL::ComPtr<ID3D12Resource> indexResource;
+		Microsoft::WRL::ComPtr<ID3D12Resource> materialResource;
+		Microsoft::WRL::ComPtr<ID3D12Resource> transfomationMatrixResource;
+		Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightResource;
+		D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
 	};
 
 	struct Light {
@@ -77,12 +97,13 @@ private:
 
 	uint32_t size;
 
+	ModelData modelData_;
+
 	bool useMonstorBall_;
 
 private:
 
 	//struct Light {
-	//	//
 	//	std::unique_ptr<DirectionalLight> directionalLight_;
 	//};
 
@@ -93,9 +114,12 @@ private:
 	ImGuiManager* imGuiManager_ = nullptr;
 	TextureManager* textureManager_ = nullptr;
 
-	// 
-	std::vector<kTriangle> triangle_;
+private:
+	
 	kSprite sprite_;
 	kSphere sphere_;
+	Model model_;
+
+	std::vector<std::unique_ptr<Triangle>> triangleArray_;
 };
 

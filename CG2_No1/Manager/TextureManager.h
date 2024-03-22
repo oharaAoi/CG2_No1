@@ -8,6 +8,7 @@
 
 #include "DirectXCommon.h"
 #include "Function/Convert.h"
+#include "Model.h"
 
 class TextureManager{
 public: // メンバ関数
