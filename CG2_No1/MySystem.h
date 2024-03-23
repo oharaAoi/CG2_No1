@@ -44,13 +44,17 @@ public: // メンバ関数
 	void BeginFrame();
 	void EndFrame();
 
-public:
+public:// 設定する関数
 
 	void CreateTriangle(Triangle* triangle, const Vertices& vertex);
 
-public:
+	void CreateSprite(Sprite* sprite, const RectVetex& vertex);
+
+public:// 描画する関数
 
 	void DrawTriangle(Triangle* triangle);
+
+	void DrawSprite(Sprite* sprite);
 
 public: // メンバ関数
 
@@ -65,6 +69,14 @@ public: // メンバ関数
 	void DrawModel(const Matrix4x4& worldMatrix, const Matrix4x4& wvpMatrix);
 
 private:
+
+	struct kSprite {
+		Microsoft::WRL::ComPtr<ID3D12Resource> vertexResourceSprite;
+		Microsoft::WRL::ComPtr<ID3D12Resource> indexResourceSprite;
+		Microsoft::WRL::ComPtr<ID3D12Resource> materialResource_;
+		Microsoft::WRL::ComPtr<ID3D12Resource> transfomationMatrixResourceSprite;
+		Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightResource;
+	};
 
 	struct kSphere {
 		Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource;

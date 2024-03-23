@@ -62,10 +62,20 @@ void MySystem::CreateTriangle(Triangle* triangle, const Vertices& vertex) {
 	triangle->Init(dxCommon_->GetDevice().Get(), vertex);
 }
 
+void MySystem::CreateSprite(Sprite* sprite, const RectVetex& vertex) {
+	sprite->Init(dxCommon_->GetDevice().Get(), vertex);
+}
+
 void MySystem::DrawTriangle(Triangle* triangle) {
 	triangle->Draw(dxCommon_->GetCommandList().Get());
 	dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureManager_->GetSRVHandleGPU(0));
 	dxCommon_->GetCommandList()->DrawInstanced(3, 1, 0, 0);
+}
+
+void MySystem::DrawSprite(Sprite* sprite) {
+	sprite->Draw(dxCommon_->GetCommandList().Get());
+	dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureManager_->GetSRVHandleGPU(0));
+	dxCommon_->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
 
 void MySystem::DrawTriangle(const Matrix4x4& wvpMatrix, const Vertices& vertex){
@@ -243,7 +253,7 @@ void MySystem::DrawSprite(const Matrix4x4& worldMatrix, const Matrix4x4& wvpMatr
 	//dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, sprite_.materialResource_->GetGPUVirtualAddress());
 	//// TransformationMatrixCBufferの設定
 	//dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(1, sprite_.transfomationMatrixResourceSprite->GetGPUVirtualAddress());
-	//// どのtextureを読むのかをコマンドに積む
+	//// どのtextureを読むのかをコマンドに積むcoo
 	//dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureManager_->GetSRVHandleGPU(0));
 	//// 描画
 	////dxCommon_->GetCommandList()->DrawInstanced(6, 1, 0, 0);

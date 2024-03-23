@@ -120,8 +120,11 @@
     <ClCompile Include="Object\Triangle.cpp">
       <Filter>Object</Filter>
     </ClCompile>
-    <ClCompile Include="Mesh.cpp">
-      <Filter>ソース ファイル</Filter>
+    <ClCompile Include="Object\Sprite.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Structures\Mesh.cpp">
+      <Filter>Structures</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -188,9 +191,6 @@
     <ClInclude Include="Structures\Matrix4x4.h">
       <Filter>Structures</Filter>
     </ClInclude>
-    <ClInclude Include="Structures\Sprite.h">
-      <Filter>Structures</Filter>
-    </ClInclude>
     <ClInclude Include="Structures\Transform.h">
       <Filter>Structures</Filter>
     </ClInclude>
@@ -224,8 +224,11 @@
     <ClInclude Include="Object\Triangle.h">
       <Filter>Object</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh.h">
-      <Filter>ヘッダー ファイル</Filter>
+    <ClInclude Include="Object\Sprite.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Structures\Mesh.h">
+      <Filter>Structures</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

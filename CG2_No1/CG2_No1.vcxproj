@@ -29,11 +29,12 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Manager\ImGuiManager.cpp" />
     <ClCompile Include="Manager\TextureManager.cpp" />
-    <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="MySystem.cpp" />
+    <ClCompile Include="Object\Sprite.cpp" />
     <ClCompile Include="Object\Triangle.cpp" />
     <ClCompile Include="Structures\DescriptorSize.cpp" />
     <ClCompile Include="Structures\Material.cpp" />
+    <ClCompile Include="Structures\Mesh.cpp" />
     <ClCompile Include="Structures\Model.cpp" />
     <ClCompile Include="WinApp\WinApp.cpp" />
   </ItemGroup>
@@ -57,15 +58,15 @@
     <ClInclude Include="Light\DirectionalLight.h" />
     <ClInclude Include="Manager\ImGuiManager.h" />
     <ClInclude Include="Manager\TextureManager.h" />
-    <ClInclude Include="Mesh.h" />
     <ClInclude Include="MySystem.h" />
+    <ClInclude Include="Object\Sprite.h" />
     <ClInclude Include="Object\Triangle.h" />
     <ClInclude Include="Structures\DescriptorSize.h" />
     <ClInclude Include="Structures\Material.h" />
     <ClInclude Include="Structures\Matrix3x3.h" />
     <ClInclude Include="Structures\Matrix4x4.h" />
+    <ClInclude Include="Structures\Mesh.h" />
     <ClInclude Include="Structures\Model.h" />
-    <ClInclude Include="Structures\Sprite.h" />
     <ClInclude Include="Structures\Transform.h" />
     <ClInclude Include="Structures\Vector2.h" />
     <ClInclude Include="Structures\Vector3.h" />
