@@ -25,6 +25,7 @@ public: // 構造体
 
 	struct MaterialData {
 		std::string textureFilePath;
+		Vector3 diffuse; // 拡散反射
 	};
 
 public:
@@ -36,7 +37,7 @@ public:
 	Material();
 	~Material();
 
-	void Init(ID3D12Device* device);
+	void Init(ID3D12Device* device, const bool& isLight);
 
 	void Draw(ID3D12GraphicsCommandList* commandList, const Matrix4x4& wvpMatrix, const Vector4& color);
 

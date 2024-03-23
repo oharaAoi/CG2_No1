@@ -18,7 +18,7 @@ void TextureManager::Initialize(DirectXCommon* dxCommon){
 	ModelData modelData = LoadObjFile("Resource", "axis.obj");
 
 	CreateShaderResource("Resource/uvChecker.png");
-	//CreateShaderResource("Resource/monsterBall.png");
+	CreateShaderResource("Resource/monsterBall.png");
 	CreateShaderResource(modelData.material.textureFilePath);
 }
 

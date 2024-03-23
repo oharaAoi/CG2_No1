@@ -66,6 +66,10 @@ void MySystem::CreateSprite(Sprite* sprite, const RectVetex& vertex) {
 	sprite->Init(dxCommon_->GetDevice().Get(), vertex);
 }
 
+void MySystem::CreateShpere(Sphere* sphere, const uint32_t& division) {
+	sphere->Init(dxCommon_->GetDevice().Get(), division);
+}
+
 void MySystem::DrawTriangle(Triangle* triangle) {
 	triangle->Draw(dxCommon_->GetCommandList().Get());
 	dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureManager_->GetSRVHandleGPU(0));
@@ -77,6 +81,13 @@ void MySystem::DrawSprite(Sprite* sprite) {
 	dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureManager_->GetSRVHandleGPU(0));
 	dxCommon_->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
+
+void MySystem::DrawSphere(Sphere* sphere) {
+	sphere->Draw(dxCommon_->GetCommandList().Get());
+	dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureManager_->GetSRVHandleGPU(0));
+	dxCommon_->GetCommandList()->DrawIndexedInstanced(sphere->GetVertexCount(), 1, 0, 0, 0);
+}
+
 
 void MySystem::DrawTriangle(const Matrix4x4& wvpMatrix, const Vertices& vertex){
 
@@ -422,80 +433,84 @@ void MySystem::DrawSphere(const Matrix4x4& worldMatrix, const Matrix4x4& wvpMatr
 }
 
 void MySystem::DrawModel(const Matrix4x4& worldMatrix, const Matrix4x4& wvpMatrix) {
-	////
-	//modelData_ = LoadObjFile("Resource", "axis.obj");
-	//// ---------------------------------------------------------------
-	//// ↓Vetrtexの設定
-	//// ---------------------------------------------------------------
-	//model_.vertexResource = CreateBufferResource(dxCommon_->GetDevice(), sizeof(VertexData) * modelData_.vertices.size());
-	//// 頂点バッファビューを作成する 
-	//model_.vertexBufferView.BufferLocation = model_.vertexResource->GetGPUVirtualAddress();
-	//// 使用するリソースのサイズは頂点6つ分
-	//model_.vertexBufferView.SizeInBytes = UINT(sizeof(VertexData) * modelData_.vertices.size());
-	//// 1頂点当たりのサイズ
-	//model_.vertexBufferView.StrideInBytes = sizeof(VertexData);
+	//
+	modelData_ = LoadObjFile("Resource", "multiMaterial.obj");
+	// ---------------------------------------------------------------
+	// ↓Vetrtexの設定
+	// ---------------------------------------------------------------
+	model_.vertexResource = CreateBufferResource(dxCommon_->GetDevice(), sizeof(VertexData) * modelData_.vertices.size());
+	// 頂点バッファビューを作成する 
+	model_.vertexBufferView.BufferLocation = model_.vertexResource->GetGPUVirtualAddress();
+	// 使用するリソースのサイズは頂点6つ分
+	model_.vertexBufferView.SizeInBytes = UINT(sizeof(VertexData) * modelData_.vertices.size());
+	// 1頂点当たりのサイズ
+	model_.vertexBufferView.StrideInBytes = sizeof(VertexData);
 
-	//VertexData* vertexData = nullptr;
-	//model_.vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-	//std::memcpy(vertexData, modelData_.vertices.data(), sizeof(VertexData) * modelData_.vertices.size());
-	//// ---------------------------------------------------------------
-	//// ↓Materialの設定
-	//// ---------------------------------------------------------------
-	//// resourceの作成
-	//model_.materialResource = CreateBufferResource(dxCommon_->GetDevice(), sizeof(Material));
-	//// データを書く
-	//Material* materialData = nullptr;
-	//// アドレスを取得
-	//model_.materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
-	//// 色を決める
-	//materialData->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	//materialData->enableLigthing = true;
-	//materialData->uvTransform = MakeIdentity4x4();
+	VertexData* vertexData = nullptr;
+	model_.vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
+	std::memcpy(vertexData, modelData_.vertices.data(), sizeof(VertexData) * modelData_.vertices.size());
+	// ---------------------------------------------------------------
+	// ↓Materialの設定
+	// ---------------------------------------------------------------
+	// resourceの作成
+	model_.materialResource = CreateBufferResource(dxCommon_->GetDevice(), sizeof(Material::kMaterial));
+	// データを書く
+	Material::kMaterial* materialData = nullptr;
+	// アドレスを取得
+	model_.materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
+	// 色を決める
+	materialData->color = Vector4(
+		modelData_.material.diffuse.x,
+		modelData_.material.diffuse.y,
+		modelData_.material.diffuse.z,
+		1.0f);
+	materialData->enableLigthing = true;
+	materialData->uvTransform = MakeIdentity4x4();
 
-	//// ---------------------------------------------------------------
-	//// ↓Transformationの設定
-	//// ---------------------------------------------------------------
-	//model_.transfomationMatrixResource = CreateBufferResource(dxCommon_->GetDevice(), sizeof(TramsformationMatrix));
-	//TramsformationMatrix* transformationMatrixDataSprite = nullptr;
-	//model_.transfomationMatrixResource->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixDataSprite));
-	//transformationMatrixDataSprite->WVP = wvpMatrix;
-	//transformationMatrixDataSprite->World = worldMatrix;
+	// ---------------------------------------------------------------
+	// ↓Transformationの設定
+	// ---------------------------------------------------------------
+	model_.transfomationMatrixResource = CreateBufferResource(dxCommon_->GetDevice(), sizeof(TramsformationMatrix));
+	TramsformationMatrix* transformationMatrixDataSprite = nullptr;
+	model_.transfomationMatrixResource->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixDataSprite));
+	transformationMatrixDataSprite->WVP = wvpMatrix;
+	transformationMatrixDataSprite->World = worldMatrix;
 
-	//// ---------------------------------------------------------------
-	//// ↓Lightingの設定
-	//// ---------------------------------------------------------------
-	///*DirectionalLight* rawPointer = directionalLight_.get();
-	//sphere_.directionalLightResource = CreateBufferResource(dxCommon_->GetDevice(), sizeof(DirectionalLight));
-	//sphere_.directionalLightResource->Map(0, nullptr, reinterpret_cast<void**>(&directionalLight_));
-	//directionalLight_->SetLight(
-	//	{ 1.0f,1.0f, 1.0f, 1.0f },
-	//	{ 0.0f, -1.0f, 0.0f },
-	//	1.0f
-	//);*/
+	// ---------------------------------------------------------------
+	// ↓Lightingの設定
+	// ---------------------------------------------------------------
+	/*DirectionalLight* rawPointer = directionalLight_.get();
+	sphere_.directionalLightResource = CreateBufferResource(dxCommon_->GetDevice(), sizeof(DirectionalLight));
+	sphere_.directionalLightResource->Map(0, nullptr, reinterpret_cast<void**>(&directionalLight_));
+	directionalLight_->SetLight(
+		{ 1.0f,1.0f, 1.0f, 1.0f },
+		{ 0.0f, -1.0f, 0.0f },
+		1.0f
+	);*/
 
-	//Light* light = nullptr;
-	//model_.directionalLightResource = CreateBufferResource(dxCommon_->GetDevice(), sizeof(Light));
-	//model_.directionalLightResource->Map(0, nullptr, reinterpret_cast<void**>(&light));
-	//light->color_ = { 1.0f,1.0f, 1.0f, 1.0f };
-	//light->direction_ = { 0.0f, -1.0f, 0.0f };
-	//light->intensity_ = 1.0f;
+	Light* light = nullptr;
+	model_.directionalLightResource = CreateBufferResource(dxCommon_->GetDevice(), sizeof(Light));
+	model_.directionalLightResource->Map(0, nullptr, reinterpret_cast<void**>(&light));
+	light->color_ = { 1.0f,1.0f, 1.0f, 1.0f };
+	light->direction_ = { 0.0f, -1.0f, 0.0f };
+	light->intensity_ = 1.0f;
 
-	//// ---------------------------------------------------------------
-	//// ↓ コマンドを積む
-	//// ---------------------------------------------------------------
-	//// 三角形の描画がある前提の設定なため不完全
-	//dxCommon_->GetCommandList()->IASetVertexBuffers(0, 1, &model_.vertexBufferView);
-	////
-	////dxCommon_->GetCommandList()->IASetIndexBuffer(&indexBufferView);
-	//// materialCBufferの設定
-	//dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, model_.materialResource->GetGPUVirtualAddress());
-	//// TransformationMatrixCBufferの設定
-	//dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(1, model_.transfomationMatrixResource->GetGPUVirtualAddress());
-	//// 
-	//dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(3, model_.directionalLightResource->GetGPUVirtualAddress());
-	//// どのtextureを読むのかをコマンドに積む
-	//dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(2, useMonstorBall_ ? textureManager_->GetSRVHandleGPU(1) : textureManager_->GetSRVHandleGPU(0));
-	//// 描画
-	//dxCommon_->GetCommandList()->DrawInstanced(UINT(modelData_.vertices.size()), 1, 0, 0);
-	////dxCommon_->GetCommandList()->DrawIndexedInstanced(size, 1, 0, 0, 0);
+	// ---------------------------------------------------------------
+	// ↓ コマンドを積む
+	// ---------------------------------------------------------------
+	// 三角形の描画がある前提の設定なため不完全
+	dxCommon_->GetCommandList()->IASetVertexBuffers(0, 1, &model_.vertexBufferView);
+	//
+	//dxCommon_->GetCommandList()->IASetIndexBuffer(&indexBufferView);
+	// materialCBufferの設定
+	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(0, model_.materialResource->GetGPUVirtualAddress());
+	// TransformationMatrixCBufferの設定
+	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(1, model_.transfomationMatrixResource->GetGPUVirtualAddress());
+	// 
+	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(3, model_.directionalLightResource->GetGPUVirtualAddress());
+	// どのtextureを読むのかをコマンドに積む
+	dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(2,textureManager_->GetSRVHandleGPU(2));
+	// 描画
+	dxCommon_->GetCommandList()->DrawInstanced(UINT(modelData_.vertices.size()), 1, 0, 0);
+	//dxCommon_->GetCommandList()->DrawIndexedInstanced(size, 1, 0, 0, 0);
 }

@@ -126,6 +126,9 @@
     <ClCompile Include="Structures\Mesh.cpp">
       <Filter>Structures</Filter>
     </ClCompile>
+    <ClCompile Include="Object\Sphere.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MySystem.h">
@@ -229,6 +232,9 @@
     </ClInclude>
     <ClInclude Include="Structures\Mesh.h">
       <Filter>Structures</Filter>
+    </ClInclude>
+    <ClInclude Include="Object\Sphere.h">
+      <Filter>Object</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

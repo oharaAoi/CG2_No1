@@ -4,8 +4,10 @@
 #include <fstream>
 #include <sstream>
 #include <cassert>
+
 #include "VertexData.h"
 #include "Material.h"
+#include "Mesh.h"
 
 struct ModelData {
 	std::vector<VertexData> vertices;
@@ -13,3 +15,14 @@ struct ModelData {
 };
 
 ModelData LoadObjFile(const std::string& directorPath, const std::string& fileName);
+
+class Model {
+public:
+
+
+
+private:
+
+	std::vector<std::unique_ptr<Mesh>> meshArray_;
+
+};

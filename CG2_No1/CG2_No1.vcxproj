@@ -30,6 +30,7 @@
     <ClCompile Include="Manager\ImGuiManager.cpp" />
     <ClCompile Include="Manager\TextureManager.cpp" />
     <ClCompile Include="MySystem.cpp" />
+    <ClCompile Include="Object\Sphere.cpp" />
     <ClCompile Include="Object\Sprite.cpp" />
     <ClCompile Include="Object\Triangle.cpp" />
     <ClCompile Include="Structures\DescriptorSize.cpp" />
@@ -59,6 +60,7 @@
     <ClInclude Include="Manager\ImGuiManager.h" />
     <ClInclude Include="Manager\TextureManager.h" />
     <ClInclude Include="MySystem.h" />
+    <ClInclude Include="Object\Sphere.h" />
     <ClInclude Include="Object\Sprite.h" />
     <ClInclude Include="Object\Triangle.h" />
     <ClInclude Include="Structures\DescriptorSize.h" />

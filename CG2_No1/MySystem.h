@@ -14,6 +14,7 @@
 #include "Model.h"
 
 #include "Triangle.h"
+#include "Sphere.h"
 
 // 
 #include "Material.h"
@@ -50,11 +51,15 @@ public:// 設定する関数
 
 	void CreateSprite(Sprite* sprite, const RectVetex& vertex);
 
+	void CreateShpere(Sphere* sphere, const uint32_t& division);
+
 public:// 描画する関数
 
 	void DrawTriangle(Triangle* triangle);
 
 	void DrawSprite(Sprite* sprite);
+
+	void DrawSphere(Sphere* sphere);
 
 public: // メンバ関数
 

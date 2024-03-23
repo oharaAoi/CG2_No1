@@ -29,6 +29,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	std::unique_ptr<Sprite> sprite = std::make_unique<Sprite>();
 
+	std::unique_ptr<Sphere> sphere = std::make_unique<Sphere>();
+
 	int kind = ObjectKind::kTriangle;
 
 	// 変数
@@ -59,9 +61,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	};
 	
 
-	kTransform sphereTransform = { {1.0f, 1.0f, 1.0f}, {0.0f, 103.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
+	kTransform sphereTransform = { {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f} };
+	Vector4 sphereColor = { 1.0f, 1.0f, 1.0f, 1.0f };
 	Matrix4x4 sphereWorldMatrix{};
 	Matrix4x4 sphereWvpMatrix{};
+
 
 
 	// triangleの初期化
@@ -69,6 +73,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	system->CreateTriangle(triangle2.get(), vertex2);
 
 	system->CreateSprite(sprite.get(), rect);
+
+	system->CreateShpere(sphere.get(), 16);
 
 	while (system->ProcessMessage()) {
 		system->BeginFrame();
@@ -89,17 +95,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		sprite->Update(uvTransformSprite, spriteTransform, camera->GetVpMatrix2D(), spriteColor);
 
 		// ---------------------------------------------------------------
-		//sphereTransform.rotate.y += 0.01f;
-		sphereWorldMatrix = MakeAffineMatrix(sphereTransform);
-		sphereWvpMatrix = Multiply(sphereWorldMatrix, camera->GetVpMatrix());
+		// sphereの更新
+		sphereTransform.rotate.y += 0.01f;
+		sphere->Update(sphereTransform, camera->GetVpMatrix(), sphereColor);
 
 		// ---------------------------------------------------------------
 		//	↓ 描画処理
 		// ---------------------------------------------------------------
-		system->DrawTriangle(triangle1.get());
+		/*system->DrawTriangle(triangle1.get());
 		system->DrawTriangle(triangle2.get());
 
-		system->DrawSprite(sprite.get());
+		system->DrawSprite(sprite.get());*/
+
+		system->DrawSphere(sphere.get());
 
 		// 三角形の描画
 		/*system->DrawTriangle(wvpMatrix, vertex1);
@@ -110,6 +118,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		// 2d描画
 		//system->DrawSprite(spriteWorldMatrix, spriteWvpMatrix, rect, uvTransformSprite);
+
 #ifdef _DEBUG
 
 		ImGui::Begin("Setting");
@@ -120,21 +129,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::Begin("Triangle");
 		ImGui::DragFloat3("scale", &triangleTransform1.scale.x, 0.01f);
 		ImGui::DragFloat3("rotate", &triangleTransform1.rotate.x, 0.01f);
-		ImGui::DragFloat3("transform", &triangleTransform1.translate.x, 0.01f);
+		ImGui::DragFloat3("translate", &triangleTransform1.translate.x, 0.01f);
 		ImGui::ColorPicker4("color", &triangleColor1.x);
 		ImGui::End();
 
 		ImGui::Begin("Sprite");
-		ImGui::DragFloat2("transform", &spriteTransform.translate.x, 1);
+		ImGui::DragFloat2("translate", &spriteTransform.translate.x, 1);
 		ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -1.0f, 10.0f);
-		ImGui::DragFloat2("UVTransform", &uvTransformSprite.translate.x, 0.01f, -1.0f, 10.0f);
+		ImGui::DragFloat2("UVTranslate", &uvTransformSprite.translate.x, 0.01f, -1.0f, 10.0f);
 		ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
 		ImGui::ColorPicker4("color", &spriteColor.x);
 
 		ImGui::End();
 
 		ImGui::Begin("Sphere");
-		ImGui::DragFloat3("transform", &sphereTransform.rotate.x, 0.1f);
+		ImGui::DragFloat3("scale", &sphereTransform.scale.x, 0.1f);
+		ImGui::DragFloat3("rotate", &sphereTransform.rotate.x, 0.1f);
+		ImGui::DragFloat3("translate", &sphereTransform.translate.x, 0.1f);
 
 		ImGui::End();
 #endif // _DEBUG

@@ -4,7 +4,7 @@ Mesh::Mesh() {}
 
 Mesh::~Mesh() {}
 
-void Mesh::Init(ID3D12Device* device, const uint32_t& vBSize, const uint32_t& iBSize, const Vertices& vertex) {
+void Mesh::Init(ID3D12Device* device, const uint32_t& vBSize, const uint32_t& iBSize) {
 	// ---------------------------------------------------------------
 	// ↓Vetrtexの設定
 	// ---------------------------------------------------------------
@@ -18,22 +18,10 @@ void Mesh::Init(ID3D12Device* device, const uint32_t& vBSize, const uint32_t& iB
 	vertexBufferView_.StrideInBytes = sizeof(VertexData);
 
 	// Resourceにデータを書き込む 
-	VertexData* vertexData = nullptr;
+	vertexData_ = nullptr;
 	// アドレスを取得
-	vertexBuffer_->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-	// 左下
-	vertexData[0].pos = vertex.vertex1;
-	vertexData[0].texcord = { 0.0f, 1.0f };
-	vertexData[0].normal = { 0.0f, 0.0f, -1.0f };
-	// 上
-	vertexData[1].pos = vertex.vertex2;
-	vertexData[1].texcord = { 0.5f, 0.0f };
-	vertexData[1].normal = { 0.0f, 0.0f, -1.0f };
-	// 右下
-	vertexData[2].pos = vertex.vertex3;
-	vertexData[2].texcord = { 1.0f, 1.0f };
-	vertexData[2].normal = { 0.0f, 0.0f, -1.0f };
-
+	vertexBuffer_->Map(0, nullptr, reinterpret_cast<void**>(&vertexData_));
+	
 	// ---------------------------------------------------------------
 	// ↓Indexの設定
 	// ---------------------------------------------------------------
@@ -42,11 +30,8 @@ void Mesh::Init(ID3D12Device* device, const uint32_t& vBSize, const uint32_t& iB
 	indexBufferView_.SizeInBytes = iBSize;
 	indexBufferView_.Format = DXGI_FORMAT_R32_UINT;
 
-	uint32_t* indexData = nullptr;
-	indexBuffer_->Map(0, nullptr, reinterpret_cast<void**>(&indexData));
-	indexData[0] = 0;
-	indexData[1] = 1;
-	indexData[2] = 2;
+	indexData_ = nullptr;
+	indexBuffer_->Map(0, nullptr, reinterpret_cast<void**>(&indexData_));
 }
 
 void Mesh::Draw(ID3D12GraphicsCommandList* commandList) {
